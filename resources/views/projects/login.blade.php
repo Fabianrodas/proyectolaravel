@@ -32,40 +32,82 @@
 
     .login-card {
       width: 100%;
-      max-width: 400px;
-      padding: 2rem;
+      max-width: 550px;
+      padding: 3rem;
       background-color: #fff;
       border-radius: 15px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      min-height: 530px;
     }
 
     .login-card h2 {
       text-align: center;
       font-weight: bold;
-      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      margin-bottom: 2rem;
     }
 
     .form-control {
       border-radius: 10px;
+      font-size: 1.1rem;
+      padding: 0.75rem 1rem;
     }
 
     .btn-primary {
       border-radius: 10px;
       font-weight: bold;
+      font-size: 1.1rem;
+      padding: 0.6rem;
     }
 
-    .text-link {
-      margin-top: 1rem;
+    .divider {
+      display: flex;
+      align-items: center;
       text-align: center;
+      margin: 2rem 0 1rem;
     }
 
-    .text-link a {
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #ccc;
+    }
+
+    .divider span {
+      margin: 0 10px;
+      width: 12px;
+      height: 12px;
+      background: #ccc;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .signup-link {
+      text-align: center;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .signup-link a {
       color: #0d6efd;
       text-decoration: none;
+      font-weight: 500;
     }
 
-    .text-link a:hover {
+    .signup-link a:hover {
       text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #999;
+      margin-top: auto;
+      padding-top: 2rem;
     }
 
     @media (max-width: 768px) {
@@ -80,41 +122,52 @@
 <div class="container-fluid">
   <div class="row h-100">
     
-    <div class="col-md-6 left-image">
-    </div>
+    <div class="col-md-6 left-image"></div>
 
     <div class="col-md-6 login-section">
-      <div class="login-card">
-        <div class="text-center mb-3">
-          <img src="/storage/images/logo.png" alt="Mango Logo" width="80" height="80">
+      <div class="login-card d-flex flex-column">
+        <div>
+          <div class="text-center mb-4">
+            <img src="/storage/images/logo.png" alt="Mango Logo" width="90" height="90">
+          </div>
+          <h2>Sign In</h2>
+
+          @if ($errors->any())
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
+
+          <form method="POST" action="{{ route('login') }}">
+            @csrf
+            <div class="mb-3">
+              <input type="text" name="login" class="form-control" placeholder="Username or email" value="{{ old('login') }}" required autofocus>
+            </div>
+            <div class="mb-3">
+              <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+
+          <!-- Divider with circle -->
+          <div class="divider">
+            <span></span>
+          </div>
+
+          <!-- Sign up text -->
+          <div class="signup-link">
+            Don't have an account? <a href="#">Sign up</a>
+          </div>
         </div>
-        <h2>Sign In</h2>
 
-        @if ($errors->any())
-          <div class="alert alert-danger">
-            <ul class="mb-0">
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
-          </div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}">
-          @csrf
-          <div class="mb-3">
-            <input type="text" name="login" class="form-control" placeholder="Username or email" value="{{ old('login') }}" required autofocus>
-          </div>
-          <div class="mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
-          </div>
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-        </form>
-
-        <div class="text-link">
-          Don't have an account? <a href="{{ route('register') }}">Register here</a>
+        <div class="footer">
+          © 2025 Mango
         </div>
       </div>
     </div>
