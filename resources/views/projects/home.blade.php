@@ -17,18 +17,21 @@
       height: 100vh;
       overflow-y: auto;
     }
+
     .right-sidebar {
       position: sticky;
       top: 0;
       height: 100vh;
       overflow-y: auto;
     }
+
     .buttons {
       display: flex;
       flex-direction: column;
       gap: 30px;
       margin-top: 75px;
     }
+
     .btn-post, .btn-logout {
       color: black;
       width: 150px;
@@ -36,18 +39,31 @@
       border-radius: 25px;
       font-size: 20px;
     }
+
     .nav-link {
       font-weight: bold;
       font-size: 16px;
       color: #0d6efd;
     }
-  #recentSection,
-#popularSection,
-#sidebarRecent,
-#sidebarPopular {
-  transition: opacity 0.3s ease-in-out;
-}
-</style>
+
+    #recentSection,
+    #popularSection,
+    #sidebarRecent,
+    #sidebarPopular {
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .post-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .img-fluid-standard {
+      max-height: 450px;
+      width: auto;
+      object-fit: contain;
+    }
+  </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -71,11 +87,11 @@
     </div>
 
     <div class="col-7 overflow-auto" style="height: 100vh;">
-    <div class="text-center my-3">
-      <a href="/home">
-        <img src="/storage/images/logo.png" width="120" height="120">
-      </a>
-    </div>
+      <div class="text-center my-3">
+        <a href="/home">
+          <img src="/storage/images/logo.png" width="120" height="120">
+        </a>
+      </div>
 
       <div class="text-center mb-3">
         <div class="btn-group" role="group">
@@ -86,106 +102,117 @@
 
       <div id="recentSection">
         @foreach ($recentPosts as $post)
-          <div class="card mb-4 shadow-sm">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center">
-                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
-                  <strong class="fs-4">{{ $post->user->username }}</strong>
+          <a href="{{ route('posts.show', $post->id) }}" class="post-link">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                    <strong class="fs-4">{{ $post->user->username }}</strong>
+                  </div>
+                  <button class="btn btn-outline-primary" style="font-size: 1.1rem;">Follow</button>
                 </div>
-                <button class="btn btn-outline-primary" style="font-size: 1.1rem; padding: 10px 20px; border-radius: 10px;">Follow</button>
-              </div>
-              <div class="text-center mb-3">
-                <img src="{{ asset($post->image) }}" class="img-fluid rounded">
-              </div>
-              <p>{{ $post->content }}</p>
-              <div class="border-top pt-3">
-                <div class="d-flex text-dark fw-semibold fs-5 mb-3">
-                  <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
-                  <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+                <div class="text-center mb-3">
+                  <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
                 </div>
-                <div class="d-flex gap-2">
-                  <input type="text" class="form-control" placeholder="Add a comment">
-                  <button class="btn btn-danger px-4 fw-bold">Like</button>
+                <p>{{ $post->content }}</p>
+                <div class="border-top pt-3">
+                  <div class="d-flex text-dark fw-semibold fs-5 mb-3">
+                    <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
+                    <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Add a comment">
+                    <button class="btn btn-danger px-4 fw-bold">Like</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </a>
         @endforeach
       </div>
 
       <div id="popularSection" style="display: none;">
         @foreach ($popularPosts as $post)
-          <div class="card mb-4 shadow-sm">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center">
-                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
-                  <strong class="fs-4">{{ $post->user->username }}</strong>
+          <a href="{{ route('posts.show', $post->id) }}" class="post-link">
+            <div class="card mb-4 shadow-sm">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                    <strong class="fs-4">{{ $post->user->username }}</strong>
+                  </div>
+                  <button class="btn btn-outline-primary" style="font-size: 1.1rem;">Follow</button>
                 </div>
-                <button class="btn btn-outline-primary" style="font-size: 1.1rem; padding: 10px 20px; border-radius: 10px;">Follow</button>
-              </div>
-              <div class="text-center mb-3">
-                <img src="{{ asset($post->image) }}" class="img-fluid rounded">
-              </div>
-              <p>{{ $post->content }}</p>
-              <div class="border-top pt-3">
-                <div class="d-flex text-dark fw-semibold fs-5 mb-3">
-                  <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
-                  <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+                <div class="text-center mb-3">
+                  <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
                 </div>
-                <div class="d-flex gap-2">
-                  <input type="text" class="form-control" placeholder="Add a comment">
-                  <button class="btn btn-danger px-4 fw-bold">Like</button>
+                <p>{{ $post->content }}</p>
+                <div class="border-top pt-3">
+                  <div class="d-flex text-dark fw-semibold fs-5 mb-3">
+                    <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
+                    <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <input type="text" class="form-control" placeholder="Add a comment">
+                    <button class="btn btn-danger px-4 fw-bold">Like</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </a>
         @endforeach
       </div>
     </div>
 
     <div class="col-3">
+      <!-- Sidebar Right: Popular Posts -->
       <div id="sidebarPopular" class="right-sidebar">
         <div class="card mt-4">
           <div class="card-body">
             <h5 class="mb-4 card-title text-center">Popular Posts</h5>
             @foreach ($popularPosts->take(3) as $post)
-              <div class="mb-4 border-bottom pb-3">
-                <div class="d-flex align-items-center mb-2">
-                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="25" height="25">
-                  <strong style="font-size: 14px;">{{ $post->user->username }}</strong>
+              <a href="{{ route('posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                <div class="mb-4 border-bottom pb-3">
+                  <div class="d-flex align-items-center mb-2">
+                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="25" height="25">
+                    <strong style="font-size: 14px;">{{ $post->user->username }}</strong>
+                  </div>
+                  <div class="text-center mb-2">
+                    <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="max-height: 80px; width: auto;">
+                  </div>
+                  <div class="text-dark fw-semibold" style="font-size: 13px;">
+                    <i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes
+                    · <i class="bi bi-chat-left-text-fill text-primary ms-2 me-1"></i> {{ $post->comments_count }} comments
+                  </div>
                 </div>
-                <div class="text-center mb-2">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="max-height: 80px; width: auto;">
-                </div>
-                <div class="text-dark fw-semibold" style="font-size: 13px;">
-                  <i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes
-                  · <i class="bi bi-chat-left-text-fill text-primary ms-2 me-1"></i> {{ $post->comments_count }} comments
-                </div>
-              </div>
+              </a>
             @endforeach
           </div>
         </div>
       </div>
+
+      <!-- Sidebar Right: Recent Posts -->
       <div id="sidebarRecent" class="right-sidebar" style="display: none;">
         <div class="card mt-4">
           <div class="card-body">
             <h5 class="mb-4 card-title text-center">Recent Posts</h5>
             @foreach ($recentPosts->take(3) as $post)
-              <div class="mb-4 border-bottom pb-3">
-                <div class="d-flex align-items-center mb-2">
-                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="25" height="25">
-                  <strong style="font-size: 14px;">{{ $post->user->username }}</strong>
+              <a href="{{ route('posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                <div class="mb-4 border-bottom pb-3">
+                  <div class="d-flex align-items-center mb-2">
+                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="25" height="25">
+                    <strong style="font-size: 14px;">{{ $post->user->username }}</strong>
+                  </div>
+                  <div class="text-center mb-2">
+                    <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="max-height: 80px; width: auto;">
+                  </div>
+                  <div class="text-dark fw-semibold" style="font-size: 13px;">
+                    <i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes
+                    · <i class="bi bi-chat-left-text-fill text-primary ms-2 me-1"></i> {{ $post->comments_count }} comments
+                  </div>
                 </div>
-                <div class="text-center mb-2">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="max-height: 80px; width: auto;">
-                </div>
-                <div class="text-dark fw-semibold" style="font-size: 13px;">
-                  <i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes
-                  · <i class="bi bi-chat-left-text-fill text-primary ms-2 me-1"></i> {{ $post->comments_count }} comments
-                </div>
-              </div>
+              </a>
             @endforeach
           </div>
         </div>
@@ -195,46 +222,46 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   function showRecent() {
-  document.getElementById('recentSection').style.opacity = '0';
-  document.getElementById('popularSection').style.opacity = '0';
-  document.getElementById('sidebarRecent').style.opacity = '0';
-  document.getElementById('sidebarPopular').style.opacity = '0';
+    document.getElementById('recentSection').style.opacity = '0';
+    document.getElementById('popularSection').style.opacity = '0';
+    document.getElementById('sidebarRecent').style.opacity = '0';
+    document.getElementById('sidebarPopular').style.opacity = '0';
 
-  setTimeout(() => {
-    document.getElementById('recentSection').style.display = 'block';
-    document.getElementById('popularSection').style.display = 'none';
-    document.getElementById('sidebarPopular').style.display = 'block';
-    document.getElementById('sidebarRecent').style.display = 'none';
+    setTimeout(() => {
+      document.getElementById('recentSection').style.display = 'block';
+      document.getElementById('popularSection').style.display = 'none';
+      document.getElementById('sidebarPopular').style.display = 'block';
+      document.getElementById('sidebarRecent').style.display = 'none';
 
-    document.getElementById('recentSection').style.opacity = '1';
-    document.getElementById('sidebarPopular').style.opacity = '1';
+      document.getElementById('recentSection').style.opacity = '1';
+      document.getElementById('sidebarPopular').style.opacity = '1';
 
-    document.getElementById('btnRecent').classList.add('active');
-    document.getElementById('btnPopular').classList.remove('active');
-  }, 150);
-}
+      document.getElementById('btnRecent').classList.add('active');
+      document.getElementById('btnPopular').classList.remove('active');
+    }, 150);
+  }
+
   function showPopular() {
-  document.getElementById('recentSection').style.opacity = '0';
-  document.getElementById('popularSection').style.opacity = '0';
-  document.getElementById('sidebarRecent').style.opacity = '0';
-  document.getElementById('sidebarPopular').style.opacity = '0';
+    document.getElementById('recentSection').style.opacity = '0';
+    document.getElementById('popularSection').style.opacity = '0';
+    document.getElementById('sidebarRecent').style.opacity = '0';
+    document.getElementById('sidebarPopular').style.opacity = '0';
 
-  setTimeout(() => {
-    document.getElementById('recentSection').style.display = 'none';
-    document.getElementById('popularSection').style.display = 'block';
-    document.getElementById('sidebarPopular').style.display = 'none';
-    document.getElementById('sidebarRecent').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('recentSection').style.display = 'none';
+      document.getElementById('popularSection').style.display = 'block';
+      document.getElementById('sidebarPopular').style.display = 'none';
+      document.getElementById('sidebarRecent').style.display = 'block';
 
-    document.getElementById('popularSection').style.opacity = '1';
-    document.getElementById('sidebarRecent').style.opacity = '1';
+      document.getElementById('popularSection').style.opacity = '1';
+      document.getElementById('sidebarRecent').style.opacity = '1';
 
-    document.getElementById('btnRecent').classList.remove('active');
-    document.getElementById('btnPopular').classList.add('active');
-  }, 150);
-}
+      document.getElementById('btnRecent').classList.remove('active');
+      document.getElementById('btnPopular').classList.add('active');
+    }, 150);
+  }
 </script>
 </body>
 </html>

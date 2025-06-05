@@ -46,8 +46,18 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        $post->load([
+            'user',
+            'comments.user',
+            'likes'
+        ])->loadCount([
+            'likes',
+            'comments'
+        ]);
+
+        return view('projects.post', compact('post'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
