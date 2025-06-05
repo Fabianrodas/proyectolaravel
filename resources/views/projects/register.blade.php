@@ -1,116 +1,210 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Register | Mango</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body, html {
-      height: 100%;
-      margin: 0;
+    body {
       background-color: #f8f9fa;
     }
 
     .container {
-      min-height: 100vh;
+      margin-top: 40px;
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto 10px;
+      width: 40px;
+    }
+
+    .circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background-color: #f0f0f0;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      margin: 0 auto 10px;
+      border: 2px solid #ccc;
+    }
+
+    .circle img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .form-control, .btn {
+      border-radius: 10px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      display: inline-block;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #ccc;
+      border-radius: 34px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #007bff;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
     }
 
     .register-card {
-      background-color: #fff;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      padding: 2rem;
-      max-width: 800px;
-      width: 100%;
-    }
-
-    .form-control {
-      border-radius: 10px;
-      font-size: 0.95rem;
+      max-width: 1000px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      margin: auto;
     }
 
     .btn-primary {
+      font-weight: bold;
+      padding: 10px 25px;
+    }
+
+    .copyright {
+      margin-top: 20px;
+      font-size: 14px;
+      color: gray;
+      text-align: center;
+    }
+
+    .choose-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 16px;
+      border: none;
       border-radius: 10px;
       font-weight: bold;
-      padding: 0.6rem;
     }
 
-    .form-switch .form-check-input {
-      width: 3em;
-      height: 1.5em;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 0.85rem;
-      color: #999;
-      margin-top: 1.5rem;
+    .choose-btn:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
+
 <div class="container">
   <div class="register-card">
-    <div class="text-center mb-4">
-      <img src="/storage/images/logo.png" alt="Mango Logo" width="70" height="70">
-    </div>
-
-    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+    <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
       @csrf
 
-      <div class="row g-3 mb-3">
-        <div class="col-md-6">
-          <input type="text" name="name" class="form-control" placeholder="Complete Name" required>
-        </div>
-        <div class="col-md-6">
-          <input type="password" name="password" class="form-control" placeholder="Password" required>
-        </div>
+      <img src="/storage/images/logo.png" alt="Logo" class="logo">
+      <h2 class="text-center mb-4">Sign Up</h2>
 
-        <div class="col-md-6">
-          <input type="text" name="username" class="form-control" placeholder="Username" required>
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
         </div>
-        <div class="col-md-6">
-          <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm password" required>
-        </div>
+      @endif
 
-        <div class="col-md-6">
-          <input type="email" name="email" class="form-control" placeholder="Email" required>
-        </div>
-        <div class="col-md-6 d-flex align-items-center">
-          <label class="form-check-label me-2" for="is_private">Private account</label>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="is_private" id="is_private">
+      <div class="row">
+        <div class="col-md-3 d-flex flex-column align-items-center">
+          <label for="image" class="form-label">Profile Image</label>
+          <div class="circle">
+            <img id="profilePreview" src="{{ asset('storage/images/default.jpg') }}" alt="Default Image">
           </div>
+          <input type="file" id="image" name="image" class="d-none" onchange="previewImage(event)">
+          <label for="image" class="choose-btn mt-1">Choose image</label>
         </div>
 
-        <div class="col-md-6">
-          <input type="file" name="image" class="form-control">
+        <div class="col-md-9">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <input type="text" name="name" class="form-control" placeholder="Complete Name" value="{{ old('name') }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <input type="password" name="password" class="form-control" placeholder="Password">
+            </div>
+            <div class="col-md-6 mb-3">
+              <input type="text" name="username" class="form-control" placeholder="Username" value="{{ old('username') }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm password">
+            </div>
+            <div class="col-md-6 mb-3">
+              <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}">
+            </div>
+            <div class="col-md-6 mb-3 d-flex align-items-center">
+              <label class="me-2">Private account</label>
+              <label class="toggle-switch">
+                <input type="checkbox" name="is_private" value="1">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
-      <p class="text-muted" style="font-size: 0.85rem;">
-        People who use our service may have uploaded your contact information to Mango ©. More information.<br>
-        By clicking "Sign up", you agree to our Terms, Privacy Policy and Cookies Policy. We may send you SMS notifications, which you can turn off at any time.
+      <p class="text-muted mt-3" style="font-size: 0.875rem;">
+        People who use our service may have uploaded your contact information to Mango ©. More information. By clicking "Sign up", you agree to our Terms, Privacy Policy and Cookies Policy. We may send you SMS notifications, which you can turn off at any time.
       </p>
 
-      <div class="d-grid">
+      <div class="d-flex justify-content-center">
         <button type="submit" class="btn btn-primary">Sign Up</button>
       </div>
 
-      <div class="text-center mt-3">
+      <p class="text-center mt-3">
         Already have an account? <a href="{{ route('login') }}">Sign in</a>
-      </div>
+      </p>
 
-      <div class="footer">
-        © 2025 Mango
-      </div>
+      <div class="copyright">© 2025 Mango</div>
     </form>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      const output = document.getElementById('profilePreview');
+      output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+</script>
+
 </body>
 </html>
