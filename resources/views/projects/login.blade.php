@@ -10,6 +10,7 @@
     body, html {
       height: 100%;
       margin: 0;
+      background-color: #f8f9fa;
     }
 
     .container-fluid {
@@ -17,9 +18,11 @@
     }
 
     .left-image {
-      background: #f8f9fa url('/storage/images/mango.png') no-repeat center 55%;
-      background-size: contain;
+      background: #f8f9fa url('/storage/images/mango.png') no-repeat;
+      background-size: 80%;
+      background-position: 100% 20%;
       height: 100%;
+      min-height: 700px;
     }
 
     .login-section {
@@ -27,46 +30,44 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      background-color: #f8f9fa;
     }
 
     .login-card {
-      width: 100%;
-      max-width: 550px;
-      padding: 3rem;
+      width: 400px;
+      padding: 2rem;
       background-color: #fff;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
-      min-height: 530px;
+      min-height: 480px;
     }
 
     .login-card h2 {
       text-align: center;
       font-weight: bold;
-      font-size: 2rem;
-      margin-bottom: 2rem;
+      font-size: 1.7rem;
+      margin-bottom: 1.5rem;
     }
 
     .form-control {
-      border-radius: 10px;
-      font-size: 1.1rem;
-      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      padding: 0.6rem 1rem;
     }
 
     .btn-primary {
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      padding: 0.6rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.55rem;
     }
 
     .divider {
       display: flex;
       align-items: center;
       text-align: center;
-      margin: 2rem 0 1rem;
+      margin: 1.5rem 0 1rem;
     }
 
     .divider::before,
@@ -79,8 +80,8 @@
 
     .divider span {
       margin: 0 10px;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background: #ccc;
       border-radius: 50%;
       display: inline-block;
@@ -88,8 +89,8 @@
 
     .signup-link {
       text-align: center;
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
     }
 
     .signup-link a {
@@ -104,15 +105,32 @@
 
     .footer {
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #999;
       margin-top: auto;
-      padding-top: 2rem;
+      padding-top: 1rem;
     }
 
     @media (max-width: 768px) {
       .left-image {
         display: none;
+      }
+
+      .login-card {
+        width: 90%;
+        padding: 1.5rem;
+      }
+
+      .login-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .form-control {
+        font-size: 0.9rem;
+      }
+
+      .btn-primary {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -126,42 +144,40 @@
 
     <div class="col-md-6 login-section">
       <div class="login-card d-flex flex-column">
-        <div>
-          <div class="text-center mb-4">
-            <img src="/storage/images/logo.png" alt="Mango Logo" width="90" height="90">
+        <div class="text-center mb-4">
+          <img src="/storage/images/logo.png" alt="Mango Logo" width="70" height="70">
+        </div>
+        <h2>Sign In</h2>
+
+        @if ($errors->any())
+          <div class="alert alert-danger">
+            <ul class="mb-0">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
           </div>
-          <h2>Sign In</h2>
+        @endif
 
-          @if ($errors->any())
-            <div class="alert alert-danger">
-              <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
-            </div>
-          @endif
-
-          <form method="POST" action="{{ route('login') }}">
-            @csrf
-            <div class="mb-3">
-              <input type="text" name="login" class="form-control" placeholder="Username or email" value="{{ old('login') }}" required autofocus>
-            </div>
-            <div class="mb-3">
-              <input type="password" name="password" class="form-control" placeholder="Password" required>
-            </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-          </form>
-
-          <div class="divider">
-            <span></span>
+        <form method="POST" action="{{ route('login') }}">
+          @csrf
+          <div class="mb-3">
+            <input type="text" name="login" class="form-control" placeholder="Username or email" value="{{ old('login') }}" required autofocus>
           </div>
-
-          <div class="signup-link">
-            Don't have an account? <a href="#">Sign up</a>
+          <div class="mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
           </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+
+        <div class="divider">
+          <span></span>
+        </div>
+
+        <div class="signup-link">
+          Don't have an account? <a href="#">Sign up</a>
         </div>
 
         <div class="footer">
