@@ -177,7 +177,7 @@
         </div>
 
         <div class="signup-link">
-          Don't have an account? <a href="#">Sign up</a>
+          Don't have an account? <a href="{{ route('register') }}">Sign up</a>
         </div>
 
         <div class="footer">
