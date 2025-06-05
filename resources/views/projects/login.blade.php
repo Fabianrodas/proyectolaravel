@@ -17,8 +17,8 @@
     }
 
     .left-image {
-      background: url('/storage/images/mango.png') no-repeat center center;
-      background-size: cover;
+      background: #f8f9fa url('/storage/images/mango.png') no-repeat center 55%;
+      background-size: contain;
       height: 100%;
     }
 
@@ -155,12 +155,10 @@
             </div>
           </form>
 
-          <!-- Divider with circle -->
           <div class="divider">
             <span></span>
           </div>
 
-          <!-- Sign up text -->
           <div class="signup-link">
             Don't have an account? <a href="#">Sign up</a>
           </div>
