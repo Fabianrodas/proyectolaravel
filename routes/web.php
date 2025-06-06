@@ -1,23 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\CommentController;
 
 Route::redirect('/', '/login');
 
+// Auth
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Home (protected)
-Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
-
-
-Route::resource('posts', PostController::class);
-Route::get('/posts/{id}', [PostController::class, 'show'])->name('posts.show');
-
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+
+// Home
+Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
+
+// Posts (solo accesibles si estás logueado)
+Route::middleware('auth')->group(function () {
+    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/{post}/like', [PostController::class, 'like'])->name('posts.like');
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+});
+
+Route::resource('posts', PostController::class)->only(['index', 'show']);

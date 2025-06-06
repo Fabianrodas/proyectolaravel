@@ -63,25 +63,37 @@
       width: auto;
       object-fit: contain;
     }
+
+    .btn-wide {
+      width: 100%;
+      height: 50px;
+      font-size: 20px;
+      border-radius: 25px;
+    }
   </style>
 </head>
 <body>
+
 <div class="container-fluid">
   <div class="row">
 
     <div class="col-2 bg-light text-start ps-2">
       <div class="left-side-buttons">
         <nav class="nav flex-column">
-          <img src="/storage/images/default.jpg" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
-          <a class="nav-link mb-3 mt-3" href="#"><i class="bi bi-house-door me-2"></i> Home</a>
+        <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
           <a class="nav-link mb-5" href="#"><i class="bi bi-info-circle me-2"></i> About us</a>
-          <div class="buttons d-grid gap-2">
-            <button class="btn btn-outline-dark">Post</button>
-            <button class="btn btn-outline-dark">Log Out</button>
+          <div class="buttons d-grid gap-3 mt-5">
+            <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
+            <form action="{{ route('logout') }}" method="POST">
+              @csrf
+              <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
+            </form>
           </div>
+
         </nav>
       </div>
     </div>
@@ -262,6 +274,7 @@
       document.getElementById('btnPopular').classList.add('active');
     }, 150);
   }
+
 </script>
 </body>
 </html>
