@@ -49,7 +49,16 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-        return view('projects.profile', compact('user'));
+        $posts = $user->posts()
+                    ->latest()
+                    ->withCount(['likes', 'comments'])
+                    ->get();
+
+        $postCount = $user->posts()->count();
+        $followerCount = $user->followers()->count();
+        $followingCount = $user->followings()->count();
+
+        return view('projects.profile', compact('user', 'posts', 'postCount', 'followerCount', 'followingCount'));
     }
 
     /**
@@ -89,6 +98,17 @@ class UserController extends Controller
     public function showProfile()
     {
         $user = Auth::user();
-        return view('projects.profile', compact('user'));
+
+        $posts = $user->posts()
+                    ->latest()
+                    ->withCount(['likes', 'comments'])
+                    ->get();
+
+        $postCount = $user->posts()->count();
+        $followerCount = $user->followers()->count();
+        $followingCount = $user->followings()->count();
+
+        return view('projects.profile', compact('user', 'posts', 'postCount', 'followerCount', 'followingCount'));
     }
+
 }

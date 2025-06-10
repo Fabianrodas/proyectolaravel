@@ -60,7 +60,9 @@
       color: white;
       border-color: #0d6efd;
     }
-
+    .row-cols-3 > .col {
+      padding: 0.25rem;
+    }
     .content-box {
       border: 1px solid #ccc;
       background-color: white;
@@ -90,7 +92,7 @@
     height: 3.125rem; /* 50px */
     font-size: 1.25rem; /* 20px */
     border-radius: 1.5625rem; /* 25px */
-    }}
+    }
   </style>
 </head>
 <body>
@@ -144,9 +146,9 @@
             <p class="mb-0">{{ $user->name }}</p>
             <small>{{ $user->bio ?? 'No bio yet' }}</small>
             <div class="mt-2">
-              <span><strong>0</strong> posts</span> ·
-              <span><strong>0</strong> followers</span> ·
-              <span><strong>0</strong> following</span>
+              <span><strong>{{ $postCount }}</strong> posts</span> ·
+              <span><strong>{{ $followerCount }}</strong> followers</span> ·
+              <span><strong>{{ $followingCount }}</strong> following</span>
             </div>
           </div>
         </div>
@@ -159,11 +161,23 @@
       </div>
 
       <!-- Content -->
-      <div class="content-box">
-        <div class="text-center">
-          <i class="bi bi-camera" style="font-size: 3rem; color: #555;"></i>
-          <h3 class="fw-bold mt-3">No posts yet</h3>
-        </div>
+      <div class="content-box" style="background-color: transparent; justify-content: flex-start;">
+        @if ($posts->isEmpty())
+          <div class="text-center w-100">
+            <i class="bi bi-camera" style="font-size: 3rem; color: #555;"></i>
+            <h3 class="fw-bold mt-3">No posts yet</h3>
+          </div>
+        @else
+          <div class="row row-cols-3 g-3 w-100">
+            @foreach ($posts as $post)
+              <div class="col">
+                <a href="{{ route('posts.show', $post->id) }}">
+                  <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">
+                </a>
+              </div>
+            @endforeach
+          </div>
+        @endif
       </div>
     </div>
 
