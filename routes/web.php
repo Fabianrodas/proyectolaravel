@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AboutController;
 
 Route::redirect('/', '/login');
 
@@ -32,3 +33,4 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('posts', PostController::class)->only(['index', 'show']);
 Route::get('/profile', [UserController::class, 'showProfile'])->middleware('auth')->name('profile');
+Route::get('/about', [AboutController::class, 'index'])->name('about');
