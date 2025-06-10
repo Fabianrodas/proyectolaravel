@@ -105,12 +105,14 @@
     <div class="col-2 bg-light text-start ps-2">
       <div class="left-side-buttons">
         <nav class="nav flex-column">
-        <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          <a href="{{ route('profile') }}">
+            <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          </a>
           <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
-          <a class="nav-link mb-5" href="#"><i class="bi bi-info-circle me-2"></i> About us</a>
+          <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           <div class="buttons d-grid gap-3 mt-5">
             <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
             <form action="{{ route('logout') }}" method="POST">
@@ -130,10 +132,23 @@
           <!-- Header del post -->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center">
-              <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+              <a href="{{ route('users.profile', $post->user->id) }}">
+                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                </a>
               <strong class="fs-4">{{ $post->user->username }}</strong>
             </div>
-            <button class="btn btn-outline-primary" style="font-size: 1rem;">Follow</button>
+            @php
+              $isFollowing = auth()->user()->isFollowing($post->user->id);
+            @endphp
+
+            @if(auth()->id() !== $post->user->id)
+              <form action="{{ route('follow.toggle', $post->user->id) }}" method="POST">
+                @csrf
+                <button class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
+                  {{ $isFollowing ? 'Following' : 'Follow' }}
+                </button>
+              </form>
+            @endif
           </div>
 
           <!-- Imagen -->
@@ -150,9 +165,15 @@
               <i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes
               <i class="bi bi-chat-left-text-fill text-primary ms-3 me-1"></i> {{ $post->comments_count }} comments
             </div>
+            @php
+              $liked = $post->likes->contains(auth()->id());
+            @endphp
+
             <form action="{{ route('posts.like', $post->id) }}" method="POST" class="mb-0">
               @csrf
-              <button type="submit" class="btn btn-danger px-4 fw-bold">Like</button>
+              <button type="submit" class="btn {{ $liked ? 'btn-outline-danger' : 'btn-danger' }} px-4 fw-bold">
+                {{ $liked ? 'Liked' : 'Like' }}
+              </button>
             </form>
           </div>
         </div>
@@ -170,7 +191,9 @@
             @forelse ($post->comments as $comment)
               <div class="comment-item">
                 <div class="d-flex align-items-center mb-2">
-                  <img src="{{ asset($comment->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="30" height="30">
+                  <a href="{{ route('users.profile', $comment->user->id) }}">
+                    <img src="{{ asset($comment->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-2" width="30" height="30">
+                  </a>
                   <strong>{{ $comment->user->username }}</strong>
                 </div>
                 <p class="mb-1">{{ $comment->content }}</p>

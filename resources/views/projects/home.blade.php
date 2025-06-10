@@ -87,7 +87,7 @@
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
-          <a class="nav-link mb-5" href="#"><i class="bi bi-info-circle me-2"></i> About us</a>
+          <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           <div class="buttons d-grid gap-3 mt-5">
             <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
             <form action="{{ route('logout') }}" method="POST">
@@ -114,67 +114,107 @@
       </div>
 
       <div id="recentSection">
-        @foreach ($recentPosts as $post)
-          <a href="{{ route('posts.show', $post->id) }}" class="post-link">
-            <div class="card mb-4 shadow-sm">
-              <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div class="d-flex align-items-center">
-                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
-                    <strong class="fs-4">{{ $post->user->username }}</strong>
-                  </div>
-                  <button class="btn btn-outline-primary" style="font-size: 1.1rem;">Follow</button>
-                </div>
-                <div class="text-center mb-3">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
-                </div>
-                <p>{{ $post->content }}</p>
-                <div class="border-top pt-3">
-                  <div class="d-flex text-dark fw-semibold fs-5 mb-3">
-                    <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
-                    <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
-                  </div>
-                  <div class="d-flex gap-2">
-                    <input type="text" class="form-control" placeholder="Add a comment">
-                    <button class="btn btn-danger px-4 fw-bold">Like</button>
-                  </div>
-                </div>
+      @foreach ($recentPosts as $post)
+        <div class="card mb-4 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center">
+                <a href="{{ route('users.profile', $post->user->id) }}">
+                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                </a>
+                <strong class="fs-4">
+                  <a href="{{ route('posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                    {{ $post->user->username }}
+                  </a>
+                </strong>
+              </div>
+              @if(auth()->id() !== $post->user->id)
+                @php $isFollowing = auth()->user()->isFollowing($post->user->id); @endphp
+                <form action="{{ route('follow.toggle', $post->user->id) }}" method="POST">
+                  @csrf
+                  <button class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
+                    {{ $isFollowing ? 'Following' : 'Follow' }}
+                  </button>
+                </form>
+              @endif
+            </div>
+            <div class="text-center mb-3">
+              <a href="{{ route('posts.show', $post->id) }}">
+                <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
+              </a>
+            </div>
+            <p>{{ $post->content }}</p>
+            <div class="border-top pt-3">
+              <div class="d-flex text-dark fw-semibold fs-5 mb-3">
+                <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
+                <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+              </div>
+              <div class="d-flex gap-2">
+                <input type="text" class="form-control" placeholder="Add a comment">
+                @php $liked = $post->likes->contains(auth()->id()); @endphp
+                <form action="{{ route('posts.like', $post->id) }}" method="POST" class="mb-0">
+                  @csrf
+                  <button type="submit" class="btn {{ $liked ? 'btn-outline-danger' : 'btn-danger' }} px-4 fw-bold">
+                    {{ $liked ? 'Liked' : 'Like' }}
+                  </button>
+                </form>
               </div>
             </div>
-          </a>
-        @endforeach
+          </div>
+        </div>
+      @endforeach
       </div>
 
       <div id="popularSection" style="display: none;">
-        @foreach ($popularPosts as $post)
-          <a href="{{ route('posts.show', $post->id) }}" class="post-link">
-            <div class="card mb-4 shadow-sm">
-              <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div class="d-flex align-items-center">
-                    <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
-                    <strong class="fs-4">{{ $post->user->username }}</strong>
-                  </div>
-                  <button class="btn btn-outline-primary" style="font-size: 1.1rem;">Follow</button>
-                </div>
-                <div class="text-center mb-3">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
-                </div>
-                <p>{{ $post->content }}</p>
-                <div class="border-top pt-3">
-                  <div class="d-flex text-dark fw-semibold fs-5 mb-3">
-                    <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
-                    <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
-                  </div>
-                  <div class="d-flex gap-2">
-                    <input type="text" class="form-control" placeholder="Add a comment">
-                    <button class="btn btn-danger px-4 fw-bold">Like</button>
-                  </div>
-                </div>
+      @foreach ($popularPosts as $post)
+        <div class="card mb-4 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center">
+                <a href="{{ route('users.profile', $post->user->id) }}">
+                  <img src="{{ asset($post->user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                </a>
+                <strong class="fs-4">
+                  <a href="{{ route('posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                    {{ $post->user->username }}
+                  </a>
+                </strong>
+              </div>
+              @if(auth()->id() !== $post->user->id)
+                @php $isFollowing = auth()->user()->isFollowing($post->user->id); @endphp
+                <form action="{{ route('follow.toggle', $post->user->id) }}" method="POST">
+                  @csrf
+                  <button class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
+                    {{ $isFollowing ? 'Following' : 'Follow' }}
+                  </button>
+                </form>
+              @endif
+            </div>
+            <div class="text-center mb-3">
+              <a href="{{ route('posts.show', $post->id) }}">
+                <img src="{{ asset($post->image) }}" class="img-fluid rounded img-fluid-standard">
+              </a>
+            </div>
+            <p>{{ $post->content }}</p>
+            <div class="border-top pt-3">
+              <div class="d-flex text-dark fw-semibold fs-5 mb-3">
+                <div class="me-4"><i class="bi bi-heart-fill text-danger me-1"></i> {{ $post->likes_count }} likes</div>
+                <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
+              </div>
+              <div class="d-flex gap-2">
+                <input type="text" class="form-control" placeholder="Add a comment">
+                @php $liked = $post->likes->contains(auth()->id()); @endphp
+                <form action="{{ route('posts.like', $post->id) }}" method="POST" class="mb-0">
+                  @csrf
+                  <button type="submit" class="btn {{ $liked ? 'btn-outline-danger' : 'btn-danger' }} px-4 fw-bold">
+                    {{ $liked ? 'Liked' : 'Like' }}
+                  </button>
+                </form>
               </div>
             </div>
-          </a>
-        @endforeach
+          </div>
+        </div>
+      @endforeach
       </div>
     </div>
 

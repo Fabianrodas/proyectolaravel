@@ -23,4 +23,9 @@ class Post extends Model
     {
         return $this->belongsToMany(User::class, 'likes')->withTimestamps();
     }
+
+    public function isLikedBy($user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 }

@@ -10,75 +10,76 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    .left-side-buttons {
-      padding-top: 30px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
+  .left-side-buttons {
+    padding-top: 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
 
-    .btn-submit {
-      background-color: #0d6efd;
-      color: white;
-      font-weight: bold;
-      padding: 10px 40px;
-      border-radius: 25px;
-    }
+  .btn-submit {
+    background-color: #0d6efd;
+    color: white;
+    font-weight: bold;
+    padding: 0.6rem 2rem;
+    border-radius: 1.5rem;
+    font-size: 1rem;
+  }
 
-    .form-area {
-      height: 100vh;
-      overflow-y: auto;
-    }
+  .form-area {
+    height: 100vh;
+    overflow-y: auto;
+  }
 
+  .form-card {
+    max-width: 56.25rem; /* 900px */
+    margin: auto;
+    width: 100%;
+  }
+
+  .preview-box {
+    width: 100%;
+    height: 25rem; /* 400px */
+    border: 0.125rem dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    position: relative;
+  }
+
+  .preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: none;
+  }
+
+  .preview-box span {
+    color: #999;
+    font-size: 1.2rem;
+  }
+
+  .nav-link {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #0d6efd;
+  }
+
+  .btn-wide {
+    width: 100%;
+    height: 3.125rem; /* 50px */
+    font-size: 1.25rem;
+    border-radius: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
     .form-card {
-      max-width: 900px;
-      margin: auto;
-      width: 100%;
+      flex-direction: column;
     }
-
-    .preview-box {
-      width: 100%;
-      height: 400px;
-      border: 2px dashed #ccc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #f8f9fa;
-      position: relative;
-    }
-
-    .preview-box img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      display: none;
-    }
-
-    .preview-box span {
-      color: #999;
-      font-size: 1.2rem;
-    }
-
-    .nav-link {
-      font-weight: bold;
-      font-size: 16px;
-      color: #0d6efd;
-    }
-
-    .btn-wide {
-      width: 100%;
-      height: 50px;
-      font-size: 20px;
-      border-radius: 25px;
-    }
-
-    @media (max-width: 768px) {
-      .form-card {
-        flex-direction: column;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
@@ -89,12 +90,14 @@
     <div class="col-2 bg-light text-start ps-2">
       <div class="left-side-buttons">
         <nav class="nav flex-column">
-          <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          <a href="{{ route('profile') }}">
+            <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          </a>
           <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
-          <a class="nav-link mb-5" href="#"><i class="bi bi-info-circle me-2"></i> About us</a>
+          <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           <div class="buttons d-grid gap-3 mt-5">
             <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
             <form action="{{ route('logout') }}" method="POST">

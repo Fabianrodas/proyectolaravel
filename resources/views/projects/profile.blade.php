@@ -102,13 +102,13 @@
       <div class="left-side-buttons">
         <nav class="nav flex-column">
           <a href="{{ route('profile') }}">
-            <img src="{{ asset($user->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" style="width: 5rem; height: 5rem;">
+            <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
           </a>
           <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
-          <a class="nav-link mb-5" href="#"><i class="bi bi-info-circle me-2"></i> About us</a>
+          <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           <div class="buttons d-grid gap-3 mt-5">
         <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
         <form action="{{ route('logout') }}" method="POST">
@@ -129,7 +129,17 @@
           <div>
             <div class="d-flex align-items-center">
               <h5 class="mb-0 fw-bold me-3">{{ '@' . $user->username }}</h5>
-              <a href="#" class="btn btn-outline-primary">Settings</a>
+              @if (auth()->id() === $user->id)
+                <a href="#" class="btn btn-outline-secondary">Settings</a>
+              @else
+                @php $isFollowing = auth()->user()->isFollowing($user->id); @endphp
+                <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline">
+                  @csrf
+                  <button type="submit" class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
+                    {{ $isFollowing ? 'Following' : 'Follow' }}
+                  </button>
+                </form>
+              @endif
             </div>
             <p class="mb-0">{{ $user->name }}</p>
             <small>{{ $user->bio ?? 'No bio yet' }}</small>

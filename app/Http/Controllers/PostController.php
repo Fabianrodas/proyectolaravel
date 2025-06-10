@@ -112,13 +112,11 @@ class PostController extends Controller
     {
         $user = auth()->user();
 
-        if ($post->likes()->where('user_id', $user->id)->exists()) {
-            $post->likes()->detach($user->id); // Quitar like
+        if ($post->isLikedBy($user)) {
+            $post->likes()->detach($user->id);
         } else {
-            $post->likes()->attach($user->id); // Dar like
+            $post->likes()->attach($user->id);
         }
-
-        return redirect()->route('posts.show', $post->id);
+        return back();
     }
-
 }

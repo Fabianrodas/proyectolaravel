@@ -9,6 +9,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\FollowController;
 
 Route::redirect('/', '/login');
 
@@ -34,3 +35,5 @@ Route::middleware('auth')->group(function () {
 Route::resource('posts', PostController::class)->only(['index', 'show']);
 Route::get('/profile', [UserController::class, 'showProfile'])->middleware('auth')->name('profile');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/user/{id}', [UserController::class, 'show'])->name('users.profile');
+Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->name('follow.toggle');
