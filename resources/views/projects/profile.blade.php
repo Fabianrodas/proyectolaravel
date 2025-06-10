@@ -168,15 +168,15 @@
             <h3 class="fw-bold mt-3">No posts yet</h3>
           </div>
         @else
-          <div class="row row-cols-3 g-3 w-100">
+          <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 w-100">
             @foreach ($posts as $post)
-              <div class="col">
+                <div class="col">
                 <a href="{{ route('posts.show', $post->id) }}">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">
+                    <img src="{{ asset($post->image) }}" class="rounded" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
                 </a>
-              </div>
+                </div>
             @endforeach
-          </div>
+            </div>
         @endif
       </div>
     </div>
