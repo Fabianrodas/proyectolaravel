@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -81,5 +83,11 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+    }
+
+    public function showProfile()
+    {
+        $user = Auth::user();
+        return view('projects.profile', compact('user'));
     }
 }

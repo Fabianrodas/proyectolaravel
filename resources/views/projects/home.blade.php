@@ -11,65 +11,65 @@
 
   <style>
     .left-side-buttons {
-      padding-top: 30px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
+    padding-top: 1.875rem; /* 30px */
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
 
-    .right-sidebar {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-    }
+  .right-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
 
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-      margin-top: 75px;
-    }
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1.875rem; /* 30px */
+    margin-top: 4.6875rem; /* 75px */
+  }
 
-    .btn-post, .btn-logout {
-      color: black;
-      width: 150px;
-      height: 60px;
-      border-radius: 25px;
-      font-size: 20px;
-    }
+  .btn-post, .btn-logout {
+    color: black;
+    width: 9.375rem; /* 150px */
+    height: 3.75rem; /* 60px */
+    border-radius: 1.5625rem; /* 25px */
+    font-size: 1.25rem; /* 20px */
+  }
 
-    .nav-link {
-      font-weight: bold;
-      font-size: 16px;
-      color: #0d6efd;
-    }
+  .nav-link {
+    font-weight: bold;
+    font-size: 1rem; /* 16px */
+    color: #0d6efd;
+  }
 
-    #recentSection,
-    #popularSection,
-    #sidebarRecent,
-    #sidebarPopular {
-      transition: opacity 0.3s ease-in-out;
-    }
+  #recentSection,
+  #popularSection,
+  #sidebarRecent,
+  #sidebarPopular {
+    transition: opacity 0.3s ease-in-out;
+  }
 
-    .post-link {
-      text-decoration: none;
-      color: inherit;
-    }
+  .post-link {
+    text-decoration: none;
+    color: inherit;
+  }
 
-    .img-fluid-standard {
-      max-height: 450px;
-      width: auto;
-      object-fit: contain;
-    }
+  .img-fluid-standard {
+    max-height: 28.125rem; /* 450px */
+    width: auto;
+    object-fit: contain;
+  }
 
-    .btn-wide {
-      width: 100%;
-      height: 50px;
-      font-size: 20px;
-      border-radius: 25px;
-    }
+  .btn-wide {
+    width: 100%;
+    height: 3.125rem; /* 50px */
+    font-size: 1.25rem; /* 20px */
+    border-radius: 1.5625rem; /* 25px */
+  }
   </style>
 </head>
 <body>
@@ -80,7 +80,9 @@
     <div class="col-2 bg-light text-start ps-2">
       <div class="left-side-buttons">
         <nav class="nav flex-column">
-        <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          <a href="{{ route('profile') }}">
+            <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+          </a>
           <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
@@ -93,7 +95,6 @@
               <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
             </form>
           </div>
-
         </nav>
       </div>
     </div>
@@ -178,7 +179,6 @@
     </div>
 
     <div class="col-3">
-      <!-- Sidebar Right: Popular Posts -->
       <div id="sidebarPopular" class="right-sidebar">
         <div class="card mt-4">
           <div class="card-body">
@@ -204,7 +204,6 @@
         </div>
       </div>
 
-      <!-- Sidebar Right: Recent Posts -->
       <div id="sidebarRecent" class="right-sidebar" style="display: none;">
         <div class="card mt-4">
           <div class="card-body">
@@ -274,7 +273,6 @@
       document.getElementById('btnPopular').classList.add('active');
     }, 150);
   }
-
 </script>
 </body>
 </html>
