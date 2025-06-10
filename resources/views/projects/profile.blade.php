@@ -161,25 +161,45 @@
         <button class="tab-btn" onclick="selectTab(this)">Likes</button>
       </div>
 
-      <!-- Content -->
-      <div class="content-box" style="background-color: transparent; justify-content: flex-start;">
-        @if ($posts->isEmpty())
-          <div class="text-center w-100">
-            <i class="bi bi-camera" style="font-size: 3rem; color: #555;"></i>
-            <h3 class="fw-bold mt-3">No posts yet</h3>
-          </div>
-        @else
-          <div class="row row-cols-3 g-3 w-100">
-            @foreach ($posts as $post)
-              <div class="col">
-                <a href="{{ route('posts.show', $post->id) }}">
-                  <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">
-                </a>
-              </div>
-            @endforeach
-          </div>
-        @endif
-      </div>
+      <!-- Content Tabs -->
+<div id="postsTab" class="content-box" style="background-color: transparent; justify-content: flex-start;">
+  @if ($posts->isEmpty())
+    <div class="text-center w-100">
+      <i class="bi bi-camera" style="font-size: 3rem; color: #555;"></i>
+      <h3 class="fw-bold mt-3">No posts yet</h3>
+    </div>
+  @else
+    <div class="row row-cols-3 g-3 w-100">
+      @foreach ($posts as $post)
+        <div class="col">
+          <a href="{{ route('posts.show', $post->id) }}">
+            <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">
+          </a>
+        </div>
+      @endforeach
+    </div>
+  @endif
+</div>
+
+<div id="likesTab" class="content-box d-none" style="background-color: transparent; justify-content: flex-start;">
+  @if ($likedPosts->isEmpty())
+    <div class="text-center w-100">
+      <i class="bi bi-heart" style="font-size: 3rem; color: #555;"></i>
+      <h3 class="fw-bold mt-3">No likes yet</h3>
+    </div>
+  @else
+    <div class="row row-cols-3 g-3 w-100">
+      @foreach ($likedPosts as $post)
+        <div class="col">
+          <a href="{{ route('posts.show', $post->id) }}">
+            <img src="{{ asset($post->image) }}" class="img-fluid rounded" style="aspect-ratio: 1 / 1; object-fit: cover; width: 100%;">
+          </a>
+        </div>
+      @endforeach
+    </div>
+  @endif
+</div>
+
     </div>
 
   </div>
@@ -189,7 +209,23 @@
   function selectTab(button) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
+
+    const tabs = ['postsTab', 'likesTab'];
+    tabs.forEach(id => document.getElementById(id).classList.add('d-none'));
+
+    if (button.innerText.trim() === 'Posts') {
+      document.getElementById('postsTab').classList.remove('d-none');
+    } else {
+      document.getElementById('likesTab').classList.remove('d-none');
+    }
   }
+</script>
+<script>
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted || window.performance?.navigation.type === 2) {
+      window.location.reload();
+    }
+  });
 </script>
 </body>
 </html>

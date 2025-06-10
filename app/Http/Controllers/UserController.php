@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Post;
 
 
 class UserController extends Controller
@@ -47,19 +48,27 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        $user = User::findOrFail($id);
-        $posts = $user->posts()
-                    ->latest()
-                    ->withCount(['likes', 'comments'])
-                    ->get();
+{
+    $user = User::findOrFail($id);
 
-        $postCount = $user->posts()->count();
-        $followerCount = $user->followers()->count();
-        $followingCount = $user->followings()->count();
+    $posts = $user->posts()
+                  ->latest()
+                  ->withCount(['likes', 'comments'])
+                  ->get();
 
-        return view('projects.profile', compact('user', 'posts', 'postCount', 'followerCount', 'followingCount'));
-    }
+    $likedPosts = Post::whereHas('likes', function ($query) use ($user) {
+        $query->where('user_id', $user->id);
+    })->latest()->get();
+
+    $postCount = $user->posts()->count();
+    $followerCount = $user->followers()->count();
+    $followingCount = $user->followings()->count();
+
+    return view('projects.profile', compact(
+        'user', 'posts', 'likedPosts',
+        'postCount', 'followerCount', 'followingCount'
+    ));
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -96,19 +105,24 @@ class UserController extends Controller
     }
 
     public function showProfile()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        $posts = $user->posts()
-                    ->latest()
-                    ->withCount(['likes', 'comments'])
-                    ->get();
+    $posts = $user->posts()
+                  ->latest()
+                  ->withCount(['likes', 'comments'])
+                  ->get();
 
-        $postCount = $user->posts()->count();
-        $followerCount = $user->followers()->count();
-        $followingCount = $user->followings()->count();
+    $likedPosts = $user->likedPosts()->latest()->get();
 
-        return view('projects.profile', compact('user', 'posts', 'postCount', 'followerCount', 'followingCount'));
-    }
+    $postCount = $user->posts()->count();
+    $followerCount = $user->followers()->count();
+    $followingCount = $user->followings()->count();
+
+    return view('projects.profile', compact(
+        'user', 'posts', 'likedPosts',
+        'postCount', 'followerCount', 'followingCount'
+    ));
+}
 
 }
