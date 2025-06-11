@@ -133,7 +133,7 @@
             <div class="d-flex align-items-center">
               <h5 class="mb-0 fw-bold me-3">{{ '@' . $user->username }}</h5>
               @if (auth()->id() === $user->id)
-                <a href="#" class="btn btn-outline-secondary">Settings</a>
+                <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Settings</a>
               @else
                 @php $isFollowing = auth()->user()->isFollowing($user->id); @endphp
                 <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline">

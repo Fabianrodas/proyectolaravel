@@ -76,9 +76,9 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit(User $user)
+    public function edit()
     {
-        //
+        return view('projects.settings', ['user' => auth()->user()]);
     }
 
     /**
@@ -88,10 +88,35 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        //
+        $user = auth()->user();
+
+        $request->validate([
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'name' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:1000',
+            'password' => 'nullable|string|min:6|confirmed',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_private' => 'nullable|boolean',
+        ]);
+
+        if ($request->filled('username')) $user->username = $request->username;
+        if ($request->filled('name')) $user->name = $request->name;
+        if ($request->filled('bio')) $user->bio = $request->bio;
+        if ($request->filled('password')) $user->password = bcrypt($request->password);
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('profiles', 'public');
+            $user->image = $path;
+        }
+
+        $user->is_private = $request->boolean('is_private', false);
+
+        $user->save();
+
+        return back()->with('success', 'Settings updated!');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -99,9 +124,13 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(Request $request)
     {
-        //
+        $user = auth()->user();
+        Auth::logout();
+        $user->delete();
+
+        return redirect('/')->with('message', 'Account deleted.');
     }
 
     public function showProfile()
