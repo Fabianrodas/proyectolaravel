@@ -10,6 +10,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\SearchController;
 
 Route::redirect('/', '/login');
 
@@ -41,3 +42,4 @@ Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->name('fo
 Route::get('/settings', [UserController::class, 'edit'])->name('settings');
 Route::post('/settings', [UserController::class, 'update']);
 Route::post('/settings/delete', [UserController::class, 'destroy'])->name('account.delete');
+Route::get('/search', [SearchController::class, 'index'])->name('search');
