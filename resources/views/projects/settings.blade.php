@@ -89,7 +89,6 @@
               <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
             </form>
           </div>
-          </nav>
         </div>
       </div>
 
@@ -103,12 +102,17 @@
       <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+        <!-- FORMULARIO PRINCIPAL -->
         <form action="{{ url('/settings') }}" method="POST" enctype="multipart/form-data" class="row g-3">
           @csrf
 
           <div class="col-md-6">
             <label class="form-label">Change picture</label>
-            <input type="file" name="image" class="form-control">
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" name="image" id="imageInput" class="form-control" style="max-width: 75%;">
+              <button type="button" class="btn btn-outline-danger" onclick="resetPicture()">Delete photo</button>
+            </div>
+            <input type="hidden" name="reset_picture" id="resetPictureInput" value="0">
           </div>
 
           <div class="col-md-6">
@@ -142,24 +146,39 @@
               <label class="form-check-label" for="privateSwitch">Private account</label>
             </div>
           </div>
-
+        </form>
+        <div class="row mt-4">
           <div class="col-md-6">
             <button type="submit" class="btn btn-primary w-100">Confirm</button>
           </div>
 
           <div class="col-md-6">
-            <form action="{{ route('account.delete') }}" method="POST"
-              onsubmit="return confirm('Are you sure you want to delete your account?');">
+            <form action="{{ route('account.delete') }}" method="POST" id="deleteAccountForm">
               @csrf
-              <button type="submit" class="btn btn-danger w-100">Delete my account</button>
+              <button type="button" class="btn btn-danger w-100" onclick="confirmDelete()">Delete my account</button>
             </form>
           </div>
+        </div>
 
-        </form>
+
       </div>
 
     </div>
   </div>
+
+  <script>
+    function resetPicture() {
+      document.getElementById('imageInput').value = '';
+      document.getElementById('resetPictureInput').value = '1';
+      alert('Your profile picture will be reset to the default after saving.');
+    }
+
+    function confirmDelete() {
+      if (confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+        document.getElementById('deleteAccountForm').submit();
+      }
+    }
+  </script>
 </body>
 
 </html>

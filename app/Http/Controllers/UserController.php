@@ -113,9 +113,18 @@ class UserController extends Controller
             $user->bio = $request->bio;
         if ($request->filled('password'))
             $user->password = bcrypt($request->password);
-        if ($request->hasFile('image')) {
+        if ($request->reset_picture == '1') {
+            if ($user->image !== 'storage/images/default.jpg') {
+                \Storage::disk('public')->delete($user->image);
+            }
+            $user->image = 'storage/images/default.jpg';
+        } elseif ($request->hasFile('image')) {
+            if ($user->image !== 'storage/images/default.jpg') {
+                \Storage::disk('public')->delete($user->image);
+            }
+
             $path = $request->file('image')->store('profiles', 'public');
-            $user->image = $path;
+            $user->image = 'storage/' . $path;
         }
 
         $user->is_private = $request->boolean('is_private', false);
@@ -136,10 +145,16 @@ class UserController extends Controller
     {
         $user = auth()->user();
         Auth::logout();
+
+        if ($user->image !== 'storage/images/default.jpg') {
+            \Storage::disk('public')->delete($user->image);
+        }
+
         $user->delete();
 
-        return redirect('/')->with('message', 'Account deleted.');
+        return redirect('/login')->with('message', 'Your account has been deleted.');
     }
+
 
     public function showProfile()
     {
