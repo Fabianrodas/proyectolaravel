@@ -108,8 +108,8 @@
           <a href="{{ route('profile') }}">
             <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
           </a>
-          <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
-          <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
+          <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
+          <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
           <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
           <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>

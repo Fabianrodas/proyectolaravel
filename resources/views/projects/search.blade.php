@@ -41,16 +41,32 @@
 
     .search-box,
     .user-card {
-      max-width: 600px;
-      margin: 0 auto 20px auto;
+      max-width: 700px;
+      margin: 0 auto 25px auto;
     }
 
     .user-card .btn {
-      min-width: 80px;
+      min-width: 90px;
+      font-size: 1rem;
     }
 
     .logo-mango {
-      width: 100px;
+      width: 140px;
+    }
+
+    .search-input {
+      font-size: 1.2rem;
+      height: 50px;
+    }
+
+    .search-btn {
+      font-size: 1.2rem;
+      height: 50px;
+    }
+
+    .this-you-badge {
+      font-size: 1rem;
+      padding: 0.5rem 1.2rem;
     }
   </style>
 </head>
@@ -82,31 +98,31 @@
       </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="col-10 py-4">
-      <div class="d-flex justify-content-center align-items-start" style="height: 80px;">
-        <!-- LOGO MANGO ALINEADO AL AVATAR -->
-        <img src="{{ asset('storage/images/logo.png') }}" alt="Mango Logo" class="logo-mango">
-      </div>
+  <!-- CONTENIDO PRINCIPAL -->
+<div class="col-10 py-4">
 
-      <!-- BUSCADOR -->
-      <div class="search-box mt-3">
-        <form method="GET" action="{{ route('search') }}" class="d-flex justify-content-center">
-          <input type="text" name="search" class="form-control me-2" placeholder="Search users..." value="{{ old('search', $query ?? '') }}">
-          <button type="submit" class="btn btn-primary">Search</button>
-        </form>
-      </div>
+  <!-- LOGO MANGO -->
+  <div class="d-flex justify-content-center mb-4" style="height: auto;">
+    <img src="{{ asset('storage/images/logo.png') }}" alt="Mango Logo" class="logo-mango">
+  </div>
 
+  <!-- BUSCADOR -->
+  <div class="search-box mb-4">
+    <form method="GET" action="{{ route('search') }}" class="d-flex justify-content-center">
+      <input type="text" name="search" class="form-control me-2 search-input" placeholder="Search users..." value="{{ old('search', $query ?? '') }}">
+      <button type="submit" class="btn btn-primary search-btn">Search</button>
+    </form>
+  </div>
       <!-- RESULTADOS -->
       @if(count($users) > 0)
         @foreach ($users as $user)
           <div class="user-card card">
             <div class="card-body d-flex justify-content-between align-items-center">
               <div class="d-flex align-items-center">
-                <img src="{{ asset($user->image ?? 'storage/images/default.jpg') }}" class="rounded-circle me-3" width="60" height="60">
+                <img src="{{ asset($user->image ?? 'storage/images/default.jpg') }}" class="rounded-circle me-3" width="65" height="65">
                 <div>
-                  <h5 class="mb-0">{{ $user->username }}</h5>
-                  <small>{{ $user->name }}</small><br>
+                  <h4 class="mb-0">{{ $user->username }}</h4>
+                  <small class="fs-6">{{ $user->name }}</small><br>
                   <small class="text-muted">{{ $user->followers()->count() }} followers</small>
                 </div>
               </div>
@@ -114,13 +130,17 @@
                 @if(Auth::id() !== $user->id)
                   <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline">
                     @csrf
-                    <button class="btn btn-outline-primary">
+                    <button class="btn {{ auth()->user()->isFollowing($user->id) ? 'btn-primary' : 'btn-outline-primary' }}">
                       {{ auth()->user()->isFollowing($user->id) ? 'Following' : 'Follow' }}
                     </button>
                   </form>
-                  <a href="{{ route('message.to', $user->id) }}" class="btn btn-outline-secondary ms-2">
+                  <a href="#" class="btn btn-outline-secondary ms-2">
                     <i class="bi bi-chat-left-text"></i>
                   </a>
+                @else
+                  <span class="badge bg-secondary this-you-badge">
+                    This is you <i class="bi bi-person-fill ms-1"></i>
+                  </span>
                 @endif
               </div>
             </div>
