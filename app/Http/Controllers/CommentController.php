@@ -36,19 +36,19 @@ class CommentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, Post $post)
-        {
-            $request->validate([
-                'content' => 'required|string|max:1000',
-            ]);
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
 
-            Comment::create([
-                'user_id' => Auth::id(),
-                'post_id' => $post->id,
-                'content' => $request->input('content'),
-            ]);
+        Comment::create([
+            'user_id' => Auth::id(),
+            'post_id' => $post->id,
+            'content' => $request->input('content'),
+        ]);
 
-            return redirect()->route('posts.show', $post->id)->with('success', 'Comment added successfully!');
-        }
+        return redirect()->route('posts.show', $post->id)->with('success', 'Comment added successfully!');
+    }
 
     /**
      * Display the specified resource.

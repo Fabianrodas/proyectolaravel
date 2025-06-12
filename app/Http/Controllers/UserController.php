@@ -48,27 +48,31 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-{
-    $user = User::findOrFail($id);
+    {
+        $user = User::findOrFail($id);
 
-    $posts = $user->posts()
-                  ->latest()
-                  ->withCount(['likes', 'comments'])
-                  ->get();
+        $posts = $user->posts()
+            ->latest()
+            ->withCount(['likes', 'comments'])
+            ->get();
 
-    $likedPosts = Post::whereHas('likes', function ($query) use ($user) {
-        $query->where('user_id', $user->id);
-    })->latest()->get();
+        $likedPosts = Post::whereHas('likes', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->latest()->get();
 
-    $postCount = $user->posts()->count();
-    $followerCount = $user->followers()->count();
-    $followingCount = $user->followings()->count();
+        $postCount = $user->posts()->count();
+        $followerCount = $user->followers()->count();
+        $followingCount = $user->followings()->count();
 
-    return view('projects.profile', compact(
-        'user', 'posts', 'likedPosts',
-        'postCount', 'followerCount', 'followingCount'
-    ));
-}
+        return view('projects.profile', compact(
+            'user',
+            'posts',
+            'likedPosts',
+            'postCount',
+            'followerCount',
+            'followingCount'
+        ));
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -101,10 +105,14 @@ class UserController extends Controller
             'is_private' => 'nullable|boolean',
         ]);
 
-        if ($request->filled('username')) $user->username = $request->username;
-        if ($request->filled('name')) $user->name = $request->name;
-        if ($request->filled('bio')) $user->bio = $request->bio;
-        if ($request->filled('password')) $user->password = bcrypt($request->password);
+        if ($request->filled('username'))
+            $user->username = $request->username;
+        if ($request->filled('name'))
+            $user->name = $request->name;
+        if ($request->filled('bio'))
+            $user->bio = $request->bio;
+        if ($request->filled('password'))
+            $user->password = bcrypt($request->password);
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('profiles', 'public');
             $user->image = $path;
@@ -134,24 +142,28 @@ class UserController extends Controller
     }
 
     public function showProfile()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $posts = $user->posts()
-                  ->latest()
-                  ->withCount(['likes', 'comments'])
-                  ->get();
+        $posts = $user->posts()
+            ->latest()
+            ->withCount(['likes', 'comments'])
+            ->get();
 
-    $likedPosts = $user->likedPosts()->latest()->get();
+        $likedPosts = $user->likedPosts()->latest()->get();
 
-    $postCount = $user->posts()->count();
-    $followerCount = $user->followers()->count();
-    $followingCount = $user->followings()->count();
+        $postCount = $user->posts()->count();
+        $followerCount = $user->followers()->count();
+        $followingCount = $user->followings()->count();
 
-    return view('projects.profile', compact(
-        'user', 'posts', 'likedPosts',
-        'postCount', 'followerCount', 'followingCount'
-    ));
-}
+        return view('projects.profile', compact(
+            'user',
+            'posts',
+            'likedPosts',
+            'postCount',
+            'followerCount',
+            'followingCount'
+        ));
+    }
 
 }

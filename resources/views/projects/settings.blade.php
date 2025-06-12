@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Settings | Mango</title>
@@ -18,12 +19,11 @@
       background-color: #f5f5f5;
     }
 
-    .left-side-buttons {
-      padding-top: 1.875rem;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
+    .btn-wide {
+      width: 100%;
+      height: 3.125rem;
+      font-size: 1.25rem;
+      border-radius: 1.5625rem;
     }
 
     .buttons {
@@ -33,7 +33,8 @@
       margin-top: 4.6875rem;
     }
 
-    .btn-post, .btn-logout {
+    .btn-post,
+    .btn-logout {
       color: black;
       width: 9.375rem;
       height: 3.75rem;
@@ -41,11 +42,12 @@
       font-size: 1.25rem;
     }
 
-    .btn-wide {
-      width: 100%;
-      height: 3.125rem;
-      font-size: 1.25rem;
-      border-radius: 1.5625rem;
+    .left-side-buttons {
+      padding-top: 1.875rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
     }
 
     .nav-link {
@@ -62,22 +64,24 @@
     }
   </style>
 </head>
-<body>
-<div class="container-fluid">
-  <div class="row">
 
-    <!-- Sidebar -->
-    <div class="col-2 bg-light text-start ps-2">
-      <div class="left-side-buttons">
-        <nav class="nav flex-column">
-          <a href="{{ route('profile') }}">
-            <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}" class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
-          </a>
-          <a class="nav-link mb-3 mt-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
-          <a class="nav-link mb-3" href="#"><i class="bi bi-search me-2"></i> Search</a>
-          <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
-          <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
-          <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+
+      <div class="col-2 bg-light text-start ps-2">
+        <div class="left-side-buttons">
+          <nav class="nav flex-column">
+            <a href="{{ route('profile') }}">
+              <img src="{{ asset(Auth::user()->image ?? 'storage/images/default.jpg') }}"
+                class="rounded-circle mb-5 mx-auto d-block" width="80" height="80">
+            </a>
+            <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
+            <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
+            <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
+            <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
+            <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
+          </nav>
           <div class="buttons d-grid gap-3 mt-5">
             <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
             <form action="{{ route('logout') }}" method="POST">
@@ -85,85 +89,77 @@
               <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
             </form>
           </div>
-        </nav>
+          </nav>
+        </div>
       </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="col-10 p-4">
-      <!-- Encabezado centrado -->
+      <div class="col-10 p-4">
         <div class="text-center mb-4">
-        <img src="{{ asset('/storage/images/logo.png') }}" alt="Logo" style="height: 80px;">
-        <p class="fs-4 fw-bold mt-2">Settings</p>
+          <img src="{{ asset('/storage/images/logo.png') }}" alt="Logo" style="height: 80px;">
+          <p class="fs-4 fw-bold mt-2">Settings</p>
         </div>
 
-      @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-      @endif
+        @if(session('success'))
+      <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-      <form action="{{ url('/settings') }}" method="POST" enctype="multipart/form-data" class="row g-3">
-        @csrf
+        <form action="{{ url('/settings') }}" method="POST" enctype="multipart/form-data" class="row g-3">
+          @csrf
 
-        <!-- Foto -->
-        <div class="col-md-6">
-          <label class="form-label">Change picture</label>
-          <input type="file" name="image" class="form-control">
-        </div>
-
-        <!-- Username -->
-        <div class="col-md-6">
-          <label class="form-label">Change username</label>
-          <input type="text" name="username" value="{{ old('username', $user->username) }}" class="form-control">
-        </div>
-
-        <!-- Password -->
-        <div class="col-md-6">
-          <label class="form-label">Change password</label>
-          <input type="password" name="password" class="form-control">
-        </div>
-
-        <!-- Confirm password -->
-        <div class="col-md-6">
-          <label class="form-label">Confirm password</label>
-          <input type="password" name="password_confirmation" class="form-control">
-        </div>
-
-        <!-- Bio -->
-        <div class="col-12">
-          <label class="form-label">Change biography</label>
-          <textarea name="bio" class="form-control" rows="2">{{ old('bio', $user->bio) }}</textarea>
-        </div>
-
-        <!-- Name -->
-        <div class="col-md-6">
-          <label class="form-label">Change name</label>
-          <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control">
-        </div>
-
-        <!-- Privacidad -->
-        <div class="col-md-6 d-flex align-items-end">
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" name="is_private" value="1" id="privateSwitch" {{ $user->is_private ? 'checked' : '' }}>
-            <label class="form-check-label" for="privateSwitch">Private account</label>
+          <div class="col-md-6">
+            <label class="form-label">Change picture</label>
+            <input type="file" name="image" class="form-control">
           </div>
-        </div>
 
-        <!-- Botones -->
-        <div class="col-md-6">
-          <button type="submit" class="btn btn-primary w-100">Confirm</button>
-        </div>
+          <div class="col-md-6">
+            <label class="form-label">Change username</label>
+            <input type="text" name="username" value="{{ old('username', $user->username) }}" class="form-control">
+          </div>
 
-        <div class="col-md-6">
-          <form action="{{ route('account.delete') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your account?');">
-            @csrf
-            <button type="submit" class="btn btn-danger w-100">Delete my account</button>
-          </form>
-        </div>
+          <div class="col-md-6">
+            <label class="form-label">Change password</label>
+            <input type="password" name="password" class="form-control">
+          </div>
 
-      </form>
+          <div class="col-md-6">
+            <label class="form-label">Confirm password</label>
+            <input type="password" name="password_confirmation" class="form-control">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Change biography</label>
+            <textarea name="bio" class="form-control" rows="2">{{ old('bio', $user->bio) }}</textarea>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Change name</label>
+            <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control">
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_private" value="1" id="privateSwitch" {{ $user->is_private ? 'checked' : '' }}>
+              <label class="form-check-label" for="privateSwitch">Private account</label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <button type="submit" class="btn btn-primary w-100">Confirm</button>
+          </div>
+
+          <div class="col-md-6">
+            <form action="{{ route('account.delete') }}" method="POST"
+              onsubmit="return confirm('Are you sure you want to delete your account?');">
+              @csrf
+              <button type="submit" class="btn btn-danger w-100">Delete my account</button>
+            </form>
+          </div>
+
+        </form>
+      </div>
+
     </div>
-
   </div>
-</div>
 </body>
+
 </html>

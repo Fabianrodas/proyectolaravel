@@ -66,9 +66,9 @@ class PostController extends Controller
             'comments.user',
             'likes'
         ])->loadCount([
-            'likes',
-            'comments'
-        ]);
+                    'likes',
+                    'comments'
+                ]);
 
         return view('projects.post', compact('post'));
     }

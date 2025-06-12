@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +9,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    body, html {
+    body,
+    html {
       height: 100%;
       margin: 0;
       background-color: #f8f9fa;
@@ -38,7 +40,7 @@
       padding: 2rem;
       background-color: #fff;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
       min-height: 480px;
@@ -136,60 +138,63 @@
     }
   </style>
 </head>
+
 <body>
 
-<div class="container-fluid">
-  <div class="row h-100">
-    
-    <div class="col-md-6 left-image"></div>
+  <div class="container-fluid">
+    <div class="row h-100">
 
-    <div class="col-md-6 login-section">
-      <div class="login-card d-flex flex-column">
-        <div class="text-center mb-4">
-          <img src="/storage/images/logo.png" alt="Mango Logo" width="70" height="70">
+      <div class="col-md-6 left-image"></div>
+
+      <div class="col-md-6 login-section">
+        <div class="login-card d-flex flex-column">
+          <div class="text-center mb-4">
+            <img src="/storage/images/logo.png" alt="Mango Logo" width="70" height="70">
+          </div>
+          <h2>Sign In</h2>
+
+          @if ($errors->any())
+        <div class="alert alert-danger">
+        <ul class="mb-0">
+          @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+        </ul>
         </div>
-        <h2>Sign In</h2>
+      @endif
 
-        @if ($errors->any())
-          <div class="alert alert-danger">
-            <ul class="mb-0">
-              @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-              @endforeach
-            </ul>
+          <form method="POST" action="{{ route('login') }}">
+            @csrf
+            <div class="mb-3">
+              <input type="text" name="login" class="form-control" placeholder="Username or email"
+                value="{{ old('login') }}" required autofocus>
+            </div>
+            <div class="mb-3">
+              <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+
+          <div class="divider">
+            <span></span>
           </div>
-        @endif
 
-        <form method="POST" action="{{ route('login') }}">
-          @csrf
-          <div class="mb-3">
-            <input type="text" name="login" class="form-control" placeholder="Username or email" value="{{ old('login') }}" required autofocus>
+          <div class="signup-link">
+            Don't have an account? <a href="{{ route('register') }}">Sign up</a>
           </div>
-          <div class="mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
+
+          <div class="footer">
+            © 2025 Mango
           </div>
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-        </form>
-
-        <div class="divider">
-          <span></span>
-        </div>
-
-        <div class="signup-link">
-          Don't have an account? <a href="{{ route('register') }}">Sign up</a>
-        </div>
-
-        <div class="footer">
-          © 2025 Mango
         </div>
       </div>
+
     </div>
-
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

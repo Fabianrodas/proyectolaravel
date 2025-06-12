@@ -15,8 +15,8 @@ class SearchController extends Controller
 
         if ($query) {
             $users = User::where('username', 'like', "%$query%")
-                         ->orWhere('name', 'like', "%$query%")
-                         ->get();
+                ->orWhere('name', 'like', "%$query%")
+                ->get();
         }
 
         return view('projects.search', compact('users', 'query'));
