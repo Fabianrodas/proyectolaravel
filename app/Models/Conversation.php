@@ -11,18 +11,26 @@ class Conversation extends Model
 
     protected $fillable = ['user1_id', 'user2_id'];
 
-    public function user1() {
+    public function user1()
+    {
         return $this->belongsTo(User::class, 'user1_id');
     }
 
-    public function user2() {
+    public function user2()
+    {
         return $this->belongsTo(User::class, 'user2_id');
     }
 
-    public function messages() {
+    public function messages()
+    {
         return $this->hasMany(Message::class);
     }
-    public function otherUser($authId) {
-    return $this->user1_id == $authId ? $this->user2 : $this->user1;
-}
+    public function otherUser($authId)
+    {
+        if ($this->user1_id == $authId) {
+            return $this->relationLoaded('user2') ? $this->user2 : User::find($this->user2_id);
+        } else {
+            return $this->relationLoaded('user1') ? $this->user1 : User::find($this->user1_id);
+        }
+    }
 }

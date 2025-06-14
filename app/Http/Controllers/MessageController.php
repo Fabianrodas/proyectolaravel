@@ -14,17 +14,20 @@ class MessageController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-
-        // Obtener todas las conversaciones del usuario
         $conversations = Conversation::where('user1_id', $user->id)
             ->orWhere('user2_id', $user->id)
-            ->with(['user1', 'user2', 'messages'])
+            ->with(['user1', 'user2', 'messages.sender'])
             ->get();
 
-        return view('projects.messages.index', compact('conversations'));
+        $selectedConversation = null;
+        if ($request->has('conversation_id')) {
+            $selectedConversation = $conversations->where('id', $request->conversation_id)->first();
+        }
+
+        return view('projects.messages.index', compact('conversations', 'selectedConversation'));
     }
 
     /**
@@ -56,7 +59,7 @@ class MessageController extends Controller
             'content' => $request->content,
         ]);
 
-        return redirect()->route('messages.show', $request->conversation_id);
+        return redirect()->route('messages.index', ['conversation_id' => $request->conversation_id]);
     }
 
     /**
@@ -113,26 +116,26 @@ class MessageController extends Controller
     }
 
     public function start($userId)
-{
-    $authId = auth()->id();
+    {
+        $authId = auth()->id();
 
-    if ($authId == $userId) {
-        return redirect()->back()->with('error', 'You cannot message yourself.');
+        if ($authId == $userId) {
+            return redirect()->back()->with('error', 'You cannot message yourself.');
+        }
+
+        $conversation = Conversation::where(function ($q) use ($authId, $userId) {
+            $q->where('user1_id', $authId)->where('user2_id', $userId);
+        })->orWhere(function ($q) use ($authId, $userId) {
+            $q->where('user1_id', $userId)->where('user2_id', $authId);
+        })->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'user1_id' => $authId,
+                'user2_id' => $userId,
+            ]);
+        }
+
+        return redirect()->route('messages.show', $conversation->id);
     }
-
-    $conversation = Conversation::where(function ($q) use ($authId, $userId) {
-        $q->where('user1_id', $authId)->where('user2_id', $userId);
-    })->orWhere(function ($q) use ($authId, $userId) {
-        $q->where('user1_id', $userId)->where('user2_id', $authId);
-    })->first();
-
-    if (!$conversation) {
-        $conversation = Conversation::create([
-            'user1_id' => $authId,
-            'user2_id' => $userId,
-        ]);
-    }
-
-    return redirect()->route('messages.show', $conversation->id);
-}
 }

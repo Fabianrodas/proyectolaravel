@@ -44,6 +44,6 @@ Route::post('/settings/delete', [UserController::class, 'destroy'])->name('accou
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
+Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
 Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
