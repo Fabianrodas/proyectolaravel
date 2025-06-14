@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\MessageController;
 
 Route::redirect('/', '/login');
 
@@ -41,3 +42,8 @@ Route::get('/settings', [UserController::class, 'edit'])->name('settings');
 Route::post('/settings', [UserController::class, 'update']);
 Route::post('/settings/delete', [UserController::class, 'destroy'])->name('account.delete');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
+Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');

@@ -13,7 +13,7 @@ class CreateMessagesTable extends Migration
             $table->foreignId('conversation_id')->constrained('conversations')->onDelete('cascade');
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->text('content');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

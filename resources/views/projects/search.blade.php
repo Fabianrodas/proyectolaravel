@@ -147,7 +147,7 @@
         {{ auth()->user()->isFollowing($user->id) ? 'Following' : 'Follow' }}
         </button>
         </form>
-        <a href="#" class="btn btn-outline-secondary ms-2">
+        <a href="{{ route('messages.start', $user->id) }}" class="btn btn-outline-secondary ms-2">
         <i class="bi bi-chat-left-text"></i>
         </a>
         @else

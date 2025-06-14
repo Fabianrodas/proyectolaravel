@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
@@ -14,7 +16,15 @@ class MessageController extends Controller
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        // Obtener todas las conversaciones del usuario
+        $conversations = Conversation::where('user1_id', $user->id)
+            ->orWhere('user2_id', $user->id)
+            ->with(['user1', 'user2', 'messages'])
+            ->get();
+
+        return view('projects.messages.index', compact('conversations'));
     }
 
     /**
@@ -35,7 +45,18 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'conversation_id' => 'required|exists:conversations,id',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $message = Message::create([
+            'conversation_id' => $request->conversation_id,
+            'sender_id' => Auth::id(),
+            'content' => $request->content,
+        ]);
+
+        return redirect()->route('messages.show', $request->conversation_id);
     }
 
     /**
@@ -44,9 +65,17 @@ class MessageController extends Controller
      * @param  \App\Models\Message  $message
      * @return \Illuminate\Http\Response
      */
-    public function show(Message $message)
+    public function show($conversationId)
     {
-        //
+        $conversation = Conversation::with(['messages.sender', 'user1', 'user2'])
+            ->findOrFail($conversationId);
+
+        // Verifica que el usuario autenticado pertenezca a la conversación
+        if (!in_array(Auth::id(), [$conversation->user1_id, $conversation->user2_id])) {
+            abort(403);
+        }
+
+        return view('projects.messages.show', compact('conversation'));
     }
 
     /**
@@ -82,4 +111,28 @@ class MessageController extends Controller
     {
         //
     }
+
+    public function start($userId)
+{
+    $authId = auth()->id();
+
+    if ($authId == $userId) {
+        return redirect()->back()->with('error', 'You cannot message yourself.');
+    }
+
+    $conversation = Conversation::where(function ($q) use ($authId, $userId) {
+        $q->where('user1_id', $authId)->where('user2_id', $userId);
+    })->orWhere(function ($q) use ($authId, $userId) {
+        $q->where('user1_id', $userId)->where('user2_id', $authId);
+    })->first();
+
+    if (!$conversation) {
+        $conversation = Conversation::create([
+            'user1_id' => $authId,
+            'user2_id' => $userId,
+        ]);
+    }
+
+    return redirect()->route('messages.show', $conversation->id);
+}
 }

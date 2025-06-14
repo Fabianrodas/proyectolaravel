@@ -12,7 +12,7 @@ class CreateConversationsTable extends Migration
             $table->id();
             $table->foreignId('user1_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('user2_id')->constrained('users')->onDelete('cascade');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
         });
     }
 

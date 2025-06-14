@@ -22,4 +22,7 @@ class Conversation extends Model
     public function messages() {
         return $this->hasMany(Message::class);
     }
+    public function otherUser($authId) {
+    return $this->user1_id == $authId ? $this->user2 : $this->user1;
+}
 }
