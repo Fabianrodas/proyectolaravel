@@ -116,7 +116,7 @@
             <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
             <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
             <a class="nav-link mb-3" href="{{ route('messages.index') }}">
-            <i class="bi bi-chat-left-text me-2"></i> Messages</a>
+              <i class="bi bi-chat-left-text me-2"></i> Messages</a>
             <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           </nav>
           <div class="buttons d-grid gap-3 mt-5">
@@ -142,13 +142,16 @@
           <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Settings</a>
         @else
           @php $isFollowing = auth()->user()->isFollowing($user->id); @endphp
-          <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline">
+          <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline me-2">
             @csrf
             <button type="submit"
             class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
             {{ $isFollowing ? 'Following' : 'Follow' }}
             </button>
           </form>
+          <a href="{{ route('messages.start', $user->id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-chat-left-text me-1"></i> Message
+          </a>
         @endif
               </div>
               <p class="mb-0">{{ $user->name }}</p>

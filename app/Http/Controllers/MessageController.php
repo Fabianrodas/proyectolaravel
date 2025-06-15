@@ -136,6 +136,6 @@ class MessageController extends Controller
             ]);
         }
 
-        return redirect()->route('messages.show', $conversation->id);
+        return redirect()->route('messages.index', ['conversation_id' => $conversation->id]);
     }
 }
