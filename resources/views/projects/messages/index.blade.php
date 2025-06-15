@@ -157,10 +157,10 @@
                                 <div id="messageContainer" class="flex-grow-1 overflow-auto px-3 mb-3"
                                     style="scroll-behavior: smooth;">
                                     @foreach ($selectedConversation->messages as $message)
-                                        <div
-                                            class="d-flex mb-2 message {{ $message->sender_id === auth()->id() ? 'sent' : 'received' }}">
+                                        <div class="d-flex mb-2 message {{ $message->sender_id === auth()->id() ? 'sent' : 'received' }}"
+                                            data-id="{{ $message->id }}">
                                             <div
-                                                class="message-content {{ $message->sender_id === auth()->id() ? 'bg-primary text-white' : 'bg-light' }}">
+                                                class="message-content {{ $message->sender_id === auth()->id() ? 'sent-message' : 'bg-light' }}">
                                                 {{ $message->content }}
                                                 <div class="text-muted small mt-1" style="font-size: 0.75rem;">
                                                     {{ $message->created_at->format('d M Y, H:i') }}
@@ -190,6 +190,12 @@
             </div>
         </div>
     </div>
+    <script>
+        function scrollToBottom() {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -222,20 +228,8 @@
                             hour: '2-digit', minute: '2-digit'
                         });
 
-                        const newMessage = document.createElement('div');
-                        newMessage.className = 'd-flex mb-2 message sent';
-                        newMessage.innerHTML = `
-                <div class="message-content sent-message">
-                    ${content}
-                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">${timestamp}</div>
-                </div>
-            `;
-                        messageContainer.appendChild(newMessage);
                         input.value = '';
-
-                        setTimeout(() => {
-                            bottom.scrollIntoView({ behavior: 'smooth' });
-                        }, 50);
+                        setTimeout(scrollToBottom, 50); 
                     } else {
                         alert('Failed to send message');
                     }
@@ -247,6 +241,65 @@
             bottom.scrollIntoView({ behavior: 'instant' });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageContainer = document.getElementById('messageContainer');
+            const bottom = document.getElementById('bottomOfMessages');
+
+            let lastMessageId = Number(
+                messageContainer.querySelector('.message[data-id]:last-child')?.dataset.id || 0
+            );
+
+            @if(isset($selectedConversation))
+                const conversationId = {{ $selectedConversation->id }};
+            @else
+                const conversationId = null;
+            @endif
+
+            async function fetchNewMessages() {
+                try {
+                    const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
+                    const newMessages = await response.json();
+
+                    if (Array.isArray(newMessages) && newMessages.length > 0) {
+                        const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
+
+                        newMessages.forEach(message => {
+                            const isMine = message.sender_id === {{ auth()->id() }};
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
+                            messageDiv.dataset.id = message.id;
+
+                            messageDiv.innerHTML = `
+    <div class="message-content ${isMine ? 'sent-message' : 'bg-light'}">
+        ${message.content}
+        <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+            ${new Date(message.created_at).toLocaleString('en-GB', {
+                                day: '2-digit', month: 'short', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            })}
+        </div>
+    </div>
+`;
+                            messageContainer.appendChild(messageDiv);
+                            lastMessageId = message.id;
+                        });
+
+                        if (nearBottom) {
+                            setTimeout(scrollToBottom, 50);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error fetching messages:", error);
+                }
+            }
+            if (conversationId) {
+                setInterval(fetchNewMessages, 1500);
+            }
+        });
+    </script>
+
+
 </body>
 
 </html>

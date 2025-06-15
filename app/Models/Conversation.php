@@ -33,4 +33,8 @@ class Conversation extends Model
             return $this->relationLoaded('user1') ? $this->user1 : User::find($this->user1_id);
         }
     }
+    public function participants()
+    {
+        return User::whereIn('id', [$this->user1_id, $this->user2_id])->get();
+    }
 }

@@ -138,4 +138,19 @@ class MessageController extends Controller
 
         return redirect()->route('messages.index', ['conversation_id' => $conversation->id]);
     }
+    public function fetchNewMessages($conversationId, $lastId)
+    {
+        $conversation = Conversation::findOrFail($conversationId);
+
+        if (!$conversation->participants()->contains(auth()->id())) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $messages = $conversation->messages()
+            ->where('id', '>', $lastId)
+            ->orderBy('created_at')
+            ->get();
+
+        return response()->json($messages);
+    }
 }

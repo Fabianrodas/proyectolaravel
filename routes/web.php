@@ -47,3 +47,4 @@ Route::get('/messages', [MessageController::class, 'index'])->name('messages.ind
 Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
 Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
+Route::get('/messages/fetch/{conversation}/{last}', [MessageController::class, 'fetchNewMessages']);
