@@ -76,7 +76,8 @@
             <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
             <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
             <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
-            <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
+            <a class="nav-link mb-3" href="{{ route('messages.index') }}">
+              <i class="bi bi-chat-left-text me-2"></i> Messages</a>
             <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           </nav>
           <div class="buttons d-grid gap-3 mt-5">
@@ -117,7 +118,8 @@
               <h5>Roberto Falquez</h5>
               <a href="https://github.com/rfalquezg" target="_blank" class="btn btn-dark btn-sm mb-2">GitHub Account</a>
               <div class="mt-3">
-                <img src="{{ asset('storage/images/yo.jpeg') }}" alt="Roberto" class="profile-img" height="250px" width="250px">
+                <img src="{{ asset('storage/images/yo.jpeg') }}" alt="Roberto" class="profile-img" height="250px"
+                  width="250px">
               </div>
             </div>
             <div class="col-md-4 mb-5">
@@ -125,7 +127,8 @@
               <a href="https://github.com/Fabianrodas" target="_blank" class="btn btn-dark btn-sm mb-2">GitHub
                 Account</a>
               <div class="mt-3">
-                <img src="{{ asset('storage/images/Fabian.png') }}" alt="Fabián" class="profile-img" height="250px" width="250px">
+                <img src="{{ asset('storage/images/Fabian.png') }}" alt="Fabián" class="profile-img" height="250px"
+                  width="250px">
               </div>
             </div>
             <div class="col-md-4 mb-5">
@@ -133,7 +136,8 @@
               <a href="https://github.com/paulabenalcazart" target="_blank" class="btn btn-dark btn-sm mb-2">GitHub
                 Account</a>
               <div class="mt-3">
-                <img src="{{ asset('storage/images/Paula.jpg') }}" alt="Paula" class="profile-img" height="250px" width="250px">
+                <img src="{{ asset('storage/images/Paula.jpg') }}" alt="Paula" class="profile-img" height="250px"
+                  width="250px">
               </div>
             </div>
           </div>

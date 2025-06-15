@@ -99,10 +99,13 @@
             </div>
 
             <div class="col-10 p-4">
-                <div class="text-center mb-3">
-                    <img src="{{ asset('storage/images/logo.png') }}" alt="Mango Logo" width="70">
+                <div class="text-center my-3">
+                    <a href="{{ route('home') }}">
+                        <img src="{{ asset('storage/images/logo.png') }}" alt="Mango Logo" width="120" height="120">
+                    </a>
                 </div>
                 <h3 class="fw-bold mb-4">Messages</h3>
+
                 <div class="row border rounded shadow" style="height: 70vh; overflow: hidden;">
                     <div class="col-md-4 border-end overflow-auto">
                         <h5 class="border-bottom p-3 mb-0">Conversations</h5>
@@ -128,17 +131,15 @@
                         @endforelse
                     </div>
 
-                    <div class="col-md-8 d-flex flex-column">
+                    <div class="col-md-8 d-flex flex-column" style="height: 70vh;">
                         @if(isset($selectedConversation))
-                            @php
-                                $otherUser = $selectedConversation->otherUser(auth()->id());
-                            @endphp
+                            @php $otherUser = $selectedConversation->otherUser(auth()->id()); @endphp
                             @if($otherUser)
                                 <div class="border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center px-3">
                                     <div class="d-flex align-items-center">
                                         <a href="{{ route('users.profile', $otherUser->id) }}">
                                             <img src="{{ asset($otherUser->image ?? 'storage/images/default.jpg') }}"
-                                                class="rounded-circle me-3" width="50" height="50" alt="{{ $otherUser->name }}">
+                                                class="rounded-circle me-3" width="50" height="50">
                                         </a>
                                         <h5 class="mb-0 fw-bold">{{ $otherUser->name }}</h5>
                                     </div>
@@ -152,24 +153,30 @@
                                         </form>
                                     @endif
                                 </div>
-                                <div class="message-box flex-grow-1 overflow-auto">
+
+                                <div id="messageContainer" class="flex-grow-1 overflow-auto px-3 mb-3"
+                                    style="scroll-behavior: smooth;">
                                     @foreach ($selectedConversation->messages as $message)
                                         <div
-                                            class="d-flex message {{ $message->sender_id === auth()->id() ? 'sent' : 'received' }} mb-2">
+                                            class="d-flex mb-2 message {{ $message->sender_id === auth()->id() ? 'sent' : 'received' }}">
                                             <div
-                                                class="message-content {{ $message->sender_id === auth()->id() ? 'sent-message' : 'bg-light' }}">
+                                                class="message-content {{ $message->sender_id === auth()->id() ? 'bg-primary text-white' : 'bg-light' }}">
                                                 {{ $message->content }}
-                                                <div class="text-muted small">{{ $message->created_at->format('d M Y, H:i') }}</div>
+                                                <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                                                    {{ $message->created_at->format('d M Y, H:i') }}
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
+                                    <div id="bottomOfMessages"></div>
                                 </div>
-                                <form action="{{ route('messages.store') }}" method="POST"
-                                    class="d-flex align-items-center mt-3 gap-2">
+
+                                <form id="messageForm" action="{{ route('messages.store') }}" method="POST"
+                                    class="d-flex align-items-center gap-2 px-3 mb-2">
                                     @csrf
                                     <input type="hidden" name="conversation_id" value="{{ $selectedConversation->id }}">
-                                    <input type="text" name="content" class="form-control" placeholder="Type your message..."
-                                        required>
+                                    <input type="text" name="content" id="messageInput" class="form-control"
+                                        placeholder="Type your message..." required>
                                     <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Send</button>
                                 </form>
                             @else
@@ -181,9 +188,65 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('messageForm');
+            const input = document.getElementById('messageInput');
+            const messageContainer = document.getElementById('messageContainer');
+            const bottom = document.getElementById('bottomOfMessages');
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const content = input.value.trim();
+                if (!content) return;
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const now = new Date();
+                        const timestamp = now.toLocaleString('en-GB', {
+                            day: '2-digit', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+
+                        const newMessage = document.createElement('div');
+                        newMessage.className = 'd-flex mb-2 message sent';
+                        newMessage.innerHTML = `
+                <div class="message-content sent-message">
+                    ${content}
+                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">${timestamp}</div>
+                </div>
+            `;
+                        messageContainer.appendChild(newMessage);
+                        input.value = '';
+
+                        setTimeout(() => {
+                            bottom.scrollIntoView({ behavior: 'smooth' });
+                        }, 50);
+                    } else {
+                        alert('Failed to send message');
+                    }
+                } catch (error) {
+                    console.error('Message error:', error);
+                    alert('An error occurred');
+                }
+            });
+            bottom.scrollIntoView({ behavior: 'instant' });
+        });
+    </script>
 </body>
 
 </html>
