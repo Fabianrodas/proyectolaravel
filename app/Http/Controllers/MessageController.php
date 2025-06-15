@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class MessageController extends Controller
 {
@@ -117,21 +118,27 @@ class MessageController extends Controller
 
     public function start($userId)
     {
-        $authId = auth()->id();
+        $authUser = auth()->user();
 
-        if ($authId == $userId) {
+        if ($authUser->id == $userId) {
             return redirect()->back()->with('error', 'You cannot message yourself.');
         }
 
-        $conversation = Conversation::where(function ($q) use ($authId, $userId) {
-            $q->where('user1_id', $authId)->where('user2_id', $userId);
-        })->orWhere(function ($q) use ($authId, $userId) {
-            $q->where('user1_id', $userId)->where('user2_id', $authId);
+        $targetUser = User::findOrFail($userId);
+
+        if ($targetUser->is_private && !$targetUser->isFollowedBy($authUser->id)) {
+            return redirect()->back()->with('error', 'You cannot message this user. Their account is private.');
+        }
+
+        $conversation = Conversation::where(function ($q) use ($authUser, $userId) {
+            $q->where('user1_id', $authUser->id)->where('user2_id', $userId);
+        })->orWhere(function ($q) use ($authUser, $userId) {
+            $q->where('user1_id', $userId)->where('user2_id', $authUser->id);
         })->first();
 
         if (!$conversation) {
             $conversation = Conversation::create([
-                'user1_id' => $authId,
+                'user1_id' => $authUser->id,
                 'user2_id' => $userId,
             ]);
         }

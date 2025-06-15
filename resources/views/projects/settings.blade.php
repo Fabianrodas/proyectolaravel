@@ -69,6 +69,7 @@
   <div class="container-fluid">
     <div class="row">
 
+      <!-- Sidebar -->
       <div class="col-2 bg-light text-start ps-2">
         <div class="left-side-buttons">
           <nav class="nav flex-column">
@@ -92,15 +93,18 @@
         </div>
       </div>
 
+      <!-- Main Content -->
       <div class="col-10 p-4">
-        <div class="text-center mb-4">
+
+        <!-- Encabezado centrado -->
+        <div class="text-center mb-4" style="width: 50%; margin: auto;">
           <img src="{{ asset('/storage/images/logo.png') }}" alt="Logo" style="height: 80px;">
           <p class="fs-4 fw-bold mt-2">Settings</p>
         </div>
 
         @if(session('success'))
-      <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+          <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
         <!-- FORMULARIO PRINCIPAL -->
         <form action="{{ url('/settings') }}" method="POST" enctype="multipart/form-data" class="row g-3">
@@ -142,27 +146,24 @@
 
           <div class="col-md-6 d-flex align-items-end">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" name="is_private" value="1" id="privateSwitch" {{ $user->is_private ? 'checked' : '' }}>
+              <input class="form-check-input" type="checkbox" name="is_private" value="1" id="privateSwitch"
+                {{ $user->is_private ? 'checked' : '' }}>
               <label class="form-check-label" for="privateSwitch">Private account</label>
             </div>
           </div>
-        </form>
-        <div class="row mt-4">
+
           <div class="col-md-6">
             <button type="submit" class="btn btn-primary w-100">Confirm</button>
           </div>
-
-          <div class="col-md-6">
-            <form action="{{ route('account.delete') }}" method="POST" id="deleteAccountForm">
-              @csrf
-              <button type="button" class="btn btn-danger w-100" onclick="confirmDelete()">Delete my account</button>
-            </form>
-          </div>
+          <div class="col-md-6 mt-3">
+          <form action="{{ route('account.delete') }}" method="POST" id="deleteAccountForm">
+            @csrf
+            <button type="button" class="btn btn-danger w-100" onclick="confirmDelete()">Delete my account</button>
+          </form>
         </div>
-
+        </form>
 
       </div>
-
     </div>
   </div>
 
@@ -180,5 +181,4 @@
     }
   </script>
 </body>
-
 </html>

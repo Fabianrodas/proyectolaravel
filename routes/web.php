@@ -36,7 +36,7 @@ Route::resource('posts', PostController::class)->only(['index', 'show']);
 Route::get('/profile', [UserController::class, 'showProfile'])->middleware('auth')->name('profile');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/user/{id}', [UserController::class, 'show'])->name('users.profile');
-Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->name('follow.toggle');
+Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->middleware('auth')->name('follow.toggle');
 
 Route::get('/settings', [UserController::class, 'edit'])->name('settings');
 Route::post('/settings', [UserController::class, 'update']);

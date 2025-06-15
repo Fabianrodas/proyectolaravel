@@ -49,29 +49,23 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
-
-        $posts = $user->posts()
-            ->latest()
-            ->withCount(['likes', 'comments'])
-            ->get();
-
-        $likedPosts = Post::whereHas('likes', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->latest()->get();
-
-        $postCount = $user->posts()->count();
-        $followerCount = $user->followers()->count();
-        $followingCount = $user->followings()->count();
-
-        return view('projects.profile', compact(
-            'user',
-            'posts',
-            'likedPosts',
-            'postCount',
-            'followerCount',
-            'followingCount'
-        ));
+        $user = User::withCount(['posts', 'followers', 'followings'])->findOrFail($id);
+        $posts = $user->posts()->latest()->get();
+        $likedPosts = $user->likedPosts()->latest()->get();
+    
+        $relationship = auth()->user()->followings()->where('followed_id', $user->id)->first();
+    
+        $status = $relationship ? $relationship->pivot->status : null;
+    
+        return view('projects.profile', [
+            'user' => $user,
+            'posts' => $posts,
+            'likedPosts' => $likedPosts,
+            'postCount' => $user->posts_count,
+            'followerCount' => $user->followers()->wherePivot('status', 'accepted')->count(),
+            'followingCount' => $user->followings()->count(),
+            'status' => $status
+        ]);
     }
 
     /**

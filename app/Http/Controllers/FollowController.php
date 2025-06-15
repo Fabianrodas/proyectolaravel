@@ -14,16 +14,19 @@ class FollowController extends Controller
     {
         $authUser = auth()->user();
         $targetUser = User::findOrFail($id);
-
-        if ($authUser->isFollowing($targetUser->id)) {
+    
+        $existing = $authUser->followings()->where('followed_id', $targetUser->id)->first();
+    
+        if ($existing) {
             $authUser->followings()->detach($targetUser->id);
+            return response()->json(['status' => 'none']);
         } else {
-            $authUser->followings()->attach($targetUser->id);
+            $status = $targetUser->is_private ? 'pending' : 'accepted';
+            $authUser->followings()->attach($targetUser->id, ['status' => $status]);
+            return response()->json(['status' => $status]);
         }
-
-        return back();
     }
-
+    
     /**
      * Display a listing of the resource.
      *

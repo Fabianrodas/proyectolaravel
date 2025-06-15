@@ -3,13 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Profile | Mango</title>
   <link rel="icon" href="{{ asset('mangoico.ico') }}" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
   <style>
     html {
       font-size: 16px;
@@ -105,6 +104,7 @@
   <div class="container-fluid">
     <div class="row">
 
+      <!-- Sidebar -->
       <div class="col-2 bg-light text-start ps-2">
         <div class="left-side-buttons">
           <nav class="nav flex-column">
@@ -115,8 +115,8 @@
             <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
             <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
             <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
-            <a class="nav-link mb-3" href="{{ route('messages.index') }}">
-              <i class="bi bi-chat-left-text me-2"></i> Messages</a>
+            <a class="nav-link mb-3" href="{{ route('messages.index') }}"><i class="bi bi-chat-left-text me-2"></i>
+              Messages</a>
             <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           </nav>
           <div class="buttons d-grid gap-3 mt-5">
@@ -126,10 +126,10 @@
               <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
             </form>
           </div>
-          </nav>
         </div>
       </div>
 
+      <!-- Main Profile -->
       <div class="col-10 p-4">
         <div class="d-flex justify-content-between align-items-start">
           <div class="d-flex align-items-center">
@@ -138,20 +138,25 @@
             <div>
               <div class="d-flex align-items-center">
                 <h5 class="mb-0 fw-bold me-3">{{ '@' . $user->username }}</h5>
+
                 @if (auth()->id() === $user->id)
           <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Settings</a>
         @else
-          @php $isFollowing = auth()->user()->isFollowing($user->id); @endphp
-          <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline me-2">
-            @csrf
-            <button type="submit"
-            class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
-            {{ $isFollowing ? 'Following' : 'Follow' }}
-            </button>
-          </form>
-          <a href="{{ route('messages.start', $user->id) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-chat-left-text me-1"></i> Message
-          </a>
+        <button id="followBtn" type="button"
+          data-user-id="{{ $user->id }}"
+          class="btn 
+            {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' : 
+              ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }} me-2">
+          <i class="bi 
+            {{ $status === 'accepted' ? 'bi-check2' : 
+              ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
+          {{ $status === 'accepted' ? 'Following' : 
+            ($status === 'pending' ? 'Requested' : 'Follow') }}
+        </button>
+              <a href="{{ route('messages.start', $user->id) }}"
+                class="btn btn-outline-secondary {{ !$user->canBeViewedBy(auth()->id()) ? 'disabled' : '' }}">
+                <i class="bi bi-chat-left-text me-1"></i> Message
+              </a>
         @endif
               </div>
               <p class="mb-0">{{ $user->name }}</p>
@@ -165,18 +170,21 @@
           </div>
         </div>
 
+        @if ($user->canBeViewedBy(auth()->id()))
+        <!-- Tabs -->
         <div class="tabs">
           <button class="tab-btn active" onclick="selectTab(this)">Posts</button>
           <button class="tab-btn" onclick="selectTab(this)">Likes</button>
         </div>
 
+        <!-- Posts Tab -->
         <div id="postsTab" class="content-box" style="background-color: transparent; justify-content: flex-start;">
           @if ($posts->isEmpty())
         <div class="text-center w-100">
         <i class="bi bi-camera" style="font-size: 3rem; color: #555;"></i>
         <h3 class="fw-bold mt-3">No posts yet</h3>
         </div>
-      @else
+        @else
           <div class="row row-cols-3 g-3 w-100">
           @foreach ($posts as $post)
         <div class="col">
@@ -187,9 +195,10 @@
         </div>
         @endforeach
           </div>
-      @endif
+        @endif
         </div>
 
+        <!-- Likes Tab -->
         <div id="likesTab" class="content-box d-none"
           style="background-color: transparent; justify-content: flex-start;">
           @if ($likedPosts->isEmpty())
@@ -197,7 +206,7 @@
         <i class="bi bi-heart" style="font-size: 3rem; color: #555;"></i>
         <h3 class="fw-bold mt-3">No likes yet</h3>
         </div>
-      @else
+        @else
           <div class="row row-cols-3 g-3 w-100">
           @foreach ($likedPosts as $post)
         <div class="col">
@@ -208,11 +217,14 @@
         </div>
         @endforeach
           </div>
-      @endif
+        @endif
         </div>
-
+    @else
+      <div class="alert alert-info mt-3">
+        This account is private. Follow to see their posts and likes.
       </div>
-
+    @endif
+      </div>
     </div>
   </div>
 
@@ -230,13 +242,42 @@
         document.getElementById('likesTab').classList.remove('d-none');
       }
     }
-  </script>
-  <script>
-    window.addEventListener('pageshow', function (event) {
-      if (event.persisted || window.performance?.navigation.type === 2) {
-        window.location.reload();
-      }
-    });
+    document.getElementById('followBtn')?.addEventListener('click', function (e) {
+  e.preventDefault(); // ⛔️ evita que recargue o mande formulario
+
+  const button = this;
+  const userId = button.dataset.userId;
+
+  fetch(`/follow/${userId}`, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    let icon = 'bi-plus';
+    let label = 'Follow';
+    let classes = 'btn btn-outline-primary';
+
+    if (data.status === 'accepted') {
+      icon = 'bi-check2';
+      label = 'Following';
+      classes = 'btn btn-outline-primary border-primary text-primary';
+    } else if (data.status === 'pending') {
+      icon = 'bi-clock';
+      label = 'Requested';
+      classes = 'btn btn-outline-secondary';
+    }
+
+    button.className = classes + ' me-2';
+    button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+  })
+  .catch(err => console.error('Follow error:', err));
+});
+
   </script>
 </body>
 

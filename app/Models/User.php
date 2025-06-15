@@ -37,18 +37,39 @@ class User extends Authenticatable
 
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id');
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')->withPivot('status');
     }
     
     public function followings()
     {
-        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id');
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
+            ->withPivot('status'); // Asegúrate que esto esté
     }
+
     
     public function isFollowing($userId)
     {
         return $this->followings()->where('followed_id', $userId)->exists();
-    }    
+    }
+    
+    public function isFollowedBy($authUserId)
+    {
+        return $this->followers()->where('follower_id', $authUserId)->where('status', 'accepted')->exists();
+    }
+
+    public function canBeViewedBy($viewerId)
+    {
+        if ($this->id === $viewerId) {
+            return true;
+        }
+        if (!$this->is_private) {
+            return true;
+        }
+        return $this->followers()
+            ->where('follower_id', $viewerId)
+            ->where('status', 'accepted')
+            ->exists();
+    }
 
     public function conversations1() {
         return $this->hasMany(Conversation::class, 'user1_id');
