@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Mango - Search</title>
+  <title>Search | Mango</title>
   <link rel="icon" href="{{ asset('mangoico.ico') }}" type="image/x-icon">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -128,37 +129,49 @@
         @if(count($users) > 0)
         @foreach ($users as $user)
         <div class="user-card card">
-        <div class="card-body d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <a href="{{ route('users.profile', $user->id) }}">
-          <img src="{{ asset($user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3"
-          width="65" height="65">
-          </a>
-          <div>
-          <h4 class="mb-0">{{ $user->username }}</h4>
-          <small class="fs-6">{{ $user->name }}</small><br>
-          <small class="text-muted">{{ $user->followers()->count() }} followers</small>
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <a href="{{ route('users.profile', $user->id) }}">
+                <img src="{{ asset($user->image ?? '/storage/images/default.jpg') }}" class="rounded-circle me-3" width="65" height="65">
+              </a>
+              <div>
+                <h4 class="mb-0">{{ $user->username }}</h4>
+                <small class="fs-6">{{ $user->name }}</small><br>
+                <small class="text-muted">
+                  {{ $user->followers()->wherePivot('status', 'accepted')->count() }} followers
+                </small>
+              </div>
+            </div>
+            <div class="text-end">
+              @if(Auth::id() !== $user->id)
+                @php
+                  $relationship = auth()->user()->followings()->where('followed_id', $user->id)->first();
+                  $status = $relationship ? $relationship->pivot->status : null;
+                @endphp
+
+                <button
+                  class="btn followBtn
+                    {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' :
+                      ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }}"
+                  data-user-id="{{ $user->id }}">
+                  <i class="bi
+                    {{ $status === 'accepted' ? 'bi-check2' :
+                      ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
+                  {{ $status === 'accepted' ? 'Following' :
+                    ($status === 'pending' ? 'Requested' : 'Follow') }}
+                </button>
+
+                <a href="{{ route('messages.start', $user->id) }}"
+                  class="btn btn-outline-secondary {{ !$user->canBeViewedBy(auth()->id()) ? 'disabled' : '' }}">
+                  <i class="bi bi-chat-left-text me-1"></i> Message
+                </a>
+              @else
+                <span class="badge bg-secondary this-you-badge">
+                  This is you <i class="bi bi-person-fill ms-1"></i>
+                </span>
+              @endif
+            </div>
           </div>
-        </div>
-        <div class="text-end">
-          @if(Auth::id() !== $user->id)
-        <form action="{{ route('follow.toggle', $user->id) }}" method="POST" class="d-inline">
-        @csrf
-        <button
-        class="btn {{ auth()->user()->isFollowing($user->id) ? 'btn-primary' : 'btn-outline-primary' }}">
-        {{ auth()->user()->isFollowing($user->id) ? 'Following' : 'Follow' }}
-        </button>
-        </form>
-        <a href="{{ route('messages.start', $user->id) }}" class="btn btn-outline-secondary ms-2">
-        <i class="bi bi-chat-left-text"></i>
-        </a>
-        @else
-        <span class="badge bg-secondary this-you-badge">
-        This is you <i class="bi bi-person-fill ms-1"></i>
-        </span>
-        @endif
-        </div>
-        </div>
         </div>
       @endforeach
     @elseif(!empty($query))
@@ -170,6 +183,45 @@
       </div>
     </div>
   </div>
+  <script>
+  document.querySelectorAll('.followBtn').forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      const userId = this.dataset.userId;
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+      fetch(`/follow/${userId}`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrf,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        let icon = 'bi-plus';
+        let label = 'Follow';
+        let classes = 'btn btn-outline-primary';
+
+        if (data.status === 'accepted') {
+          icon = 'bi-check2';
+          label = 'Following';
+          classes = 'btn btn-outline-primary border-primary text-primary';
+        } else if (data.status === 'pending') {
+          icon = 'bi-clock';
+          label = 'Requested';
+          classes = 'btn btn-outline-secondary';
+        }
+
+        this.className = 'btn followBtn ' + classes;
+        this.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+      })
+      .catch(err => console.error('Follow error:', err));
+    });
+  });
+</script>
 
 </body>
 

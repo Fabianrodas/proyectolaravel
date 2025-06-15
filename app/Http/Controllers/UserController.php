@@ -62,8 +62,8 @@ class UserController extends Controller
             'posts' => $posts,
             'likedPosts' => $likedPosts,
             'postCount' => $user->posts_count,
-            'followerCount' => $user->followers()->wherePivot('status', 'accepted')->count(),
-            'followingCount' => $user->followings()->count(),
+            'followerCount' => $user->acceptedFollowers()->count(),
+            'followingCount' => $user->acceptedFollowings()->count(),
             'status' => $status
         ]);
     }
@@ -162,8 +162,8 @@ class UserController extends Controller
         $likedPosts = $user->likedPosts()->latest()->get();
 
         $postCount = $user->posts()->count();
-        $followerCount = $user->followers()->count();
-        $followingCount = $user->followings()->count();
+        $followerCount = $user->acceptedFollowers()->count(); 
+        $followingCount = $user->acceptedFollowings()->count();
 
         return view('projects.profile', compact(
             'user',

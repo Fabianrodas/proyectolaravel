@@ -104,7 +104,6 @@
   <div class="container-fluid">
     <div class="row">
 
-      <!-- Sidebar -->
       <div class="col-2 bg-light text-start ps-2">
         <div class="left-side-buttons">
           <nav class="nav flex-column">
@@ -129,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Main Profile -->
       <div class="col-10 p-4">
         <div class="d-flex justify-content-between align-items-start">
           <div class="d-flex align-items-center">
@@ -171,13 +169,11 @@
         </div>
 
         @if ($user->canBeViewedBy(auth()->id()))
-        <!-- Tabs -->
         <div class="tabs">
           <button class="tab-btn active" onclick="selectTab(this)">Posts</button>
           <button class="tab-btn" onclick="selectTab(this)">Likes</button>
         </div>
 
-        <!-- Posts Tab -->
         <div id="postsTab" class="content-box" style="background-color: transparent; justify-content: flex-start;">
           @if ($posts->isEmpty())
         <div class="text-center w-100">
@@ -198,7 +194,6 @@
         @endif
         </div>
 
-        <!-- Likes Tab -->
         <div id="likesTab" class="content-box d-none"
           style="background-color: transparent; justify-content: flex-start;">
           @if ($likedPosts->isEmpty())
@@ -243,8 +238,7 @@
       }
     }
     document.getElementById('followBtn')?.addEventListener('click', function (e) {
-  e.preventDefault(); // ⛔️ evita que recargue o mande formulario
-
+  e.preventDefault();
   const button = this;
   const userId = button.dataset.userId;
 

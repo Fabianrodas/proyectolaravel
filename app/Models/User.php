@@ -43,7 +43,7 @@ class User extends Authenticatable
     public function followings()
     {
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
-            ->withPivot('status'); // Asegúrate que esto esté
+            ->withPivot('status'); 
     }
 
     
@@ -55,6 +55,16 @@ class User extends Authenticatable
     public function isFollowedBy($authUserId)
     {
         return $this->followers()->where('follower_id', $authUserId)->where('status', 'accepted')->exists();
+    }
+
+    public function acceptedFollowers()
+    {
+        return $this->followers()->wherePivot('status', 'accepted');
+    }
+
+    public function acceptedFollowings()
+    {
+        return $this->followings()->wherePivot('status', 'accepted');
     }
 
     public function canBeViewedBy($viewerId)

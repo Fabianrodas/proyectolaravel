@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ $post->user->username }}'s Post</title>
   <link rel="icon" href="{{ asset('mangoico.ico') }}" type="image/x-icon">
@@ -154,19 +155,25 @@
                 </a>
                 <strong class="fs-4">{{ $post->user->username }}</strong>
               </div>
-              @php
-        $isFollowing = auth()->user()->isFollowing($post->user->id);
-      @endphp
-
               @if(auth()->id() !== $post->user->id)
-          <form action="{{ route('follow.toggle', $post->user->id) }}" method="POST">
-          @csrf
-          <button
-            class="btn {{ $isFollowing ? 'btn-outline-primary border-primary text-primary' : 'btn-outline-primary' }}">
-            {{ $isFollowing ? 'Following' : 'Follow' }}
-          </button>
-          </form>
-        @endif
+                  @php
+                      $relationship = auth()->user()->followings()->where('followed_id', $post->user->id)->first();
+                      $status = $relationship ? $relationship->pivot->status : null;
+                  @endphp
+
+                  <button id="followBtn"
+                      type="button"
+                      data-user-id="{{ $post->user->id }}"
+                      class="btn 
+                          {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' : 
+                            ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }}">
+                      <i class="bi 
+                          {{ $status === 'accepted' ? 'bi-check2' : 
+                            ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
+                      {{ $status === 'accepted' ? 'Following' : 
+                        ($status === 'pending' ? 'Requested' : 'Follow') }}
+                  </button>
+              @endif
             </div>
 
             <div class="img-container mb-3">
@@ -233,6 +240,44 @@
 
     </div>
   </div>
+  <script>
+document.getElementById('followBtn')?.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const button = this;
+    const userId = button.dataset.userId;
+
+    fetch(`/follow/${userId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        let icon = 'bi-plus';
+        let label = 'Follow';
+        let classes = 'btn btn-outline-primary';
+
+        if (data.status === 'accepted') {
+            icon = 'bi-check2';
+            label = 'Following';
+            classes = 'btn btn-outline-primary border-primary text-primary';
+        } else if (data.status === 'pending') {
+            icon = 'bi-clock';
+            label = 'Requested';
+            classes = 'btn btn-outline-secondary';
+        }
+
+        button.className = classes;
+        button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+    })
+    .catch(err => console.error('Follow error:', err));
+});
+</script>
+
 </body>
 
 </html>

@@ -4,38 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class HomeController extends Controller
 {
     public function index()
-    {
-        $authUser = Auth::user();
+{
+    $user = auth()->user();
 
-        $followedUserIds = $authUser->followings()
-            ->wherePivot('status', 'accepted')
-            ->pluck('followed_id');
+    $visibleUserIds = User::where('is_private', false)
+    ->orWhereHas('followers', function ($query) use ($user) {
+        $query->where('follower_id', $user->id)
+              ->where('status', 'accepted');
+    })
+    ->orWhere('id', $user->id)
+    ->pluck('id');
 
-        $recentPosts = Post::with('user')
-            ->withCount(['likes', 'comments'])
-            ->where(function ($query) use ($followedUserIds, $authUser) {
-                $query->whereIn('user_id', $followedUserIds)
-                    ->orWhere('user_id', $authUser->id);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
 
-        $popularPosts = Post::with('user')
-            ->withCount(['likes', 'comments'])
-            ->where(function ($query) use ($followedUserIds, $authUser) {
-                $query->whereIn('user_id', $followedUserIds)
-                    ->orWhere('user_id', $authUser->id);
-            })
-            ->orderBy('likes_count', 'desc')
-            ->take(5)
-            ->get();
+    $recentPosts = Post::whereIn('user_id', $visibleUserIds)
+        ->with(['user', 'likes', 'comments'])
+        ->withCount(['likes', 'comments'])
+        ->latest()
+        ->get();
 
-        return view('projects.home', compact('recentPosts', 'popularPosts'));
-    }
+    $popularPosts = Post::whereIn('user_id', $visibleUserIds)
+        ->with(['user', 'likes', 'comments'])
+        ->withCount(['likes', 'comments'])
+        ->orderByDesc('likes_count')
+        ->take(20)
+        ->get();
+
+    return view('projects.home', compact('recentPosts', 'popularPosts'));
+}
 }
