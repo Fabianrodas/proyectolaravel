@@ -109,26 +109,40 @@
                 <div class="row border rounded shadow" style="height: 70vh; overflow: hidden;">
                     <div class="col-md-4 border-end overflow-auto">
                         <h5 class="border-bottom p-3 mb-0">Conversations</h5>
-                        @forelse ($conversations as $conversation)
+                        @foreach ($conversations as $conversation)
                             @php
                                 $otherUser = $conversation->user1_id === auth()->id() ? $conversation->user2 : $conversation->user1;
-                                $lastMessage = $conversation->messages->last();
+
+                                $unreadQuery = $conversation->messages()
+                                    ->where('sender_id', '!=', auth()->id())
+                                    ->where('read', false);
+
+                                $unreadCount = $unreadQuery->count();
+                                $lastUnreadMessage = $unreadQuery->latest()->first();
+
+                                $lastMessage = $lastUnreadMessage ?? $conversation->messages->last();
                             @endphp
+
                             <a href="{{ route('messages.index', ['conversation_id' => $conversation->id]) }}"
                                 class="text-decoration-none text-dark">
-                                <div class="d-flex align-items-center p-3 border-bottom hover-bg-light">
+                                <div class="d-flex align-items-center p-3 border-bottom hover-bg-light conversation-item"
+                                    data-id="{{ $conversation->id }}">
                                     <img src="{{ asset($otherUser->image ?? '/storage/images/default.jpg') }}"
                                         class="rounded-circle me-3" width="50" height="50">
-                                    <div>
+                                    <div class="flex-grow-1">
                                         <strong>{{ $otherUser->name }}</strong><br>
-                                        <small
-                                            class="text-muted">{{ $lastMessage ? $lastMessage->content : 'No messages yet' }}</small>
+                                        <small class="text-muted message-preview {{ $unreadCount > 0 ? 'fw-bold' : '' }}">
+                                            {{ $lastMessage ? $lastMessage->content : 'No messages yet' }}
+                                        </small>
                                     </div>
+                                    @if ($unreadCount > 0)
+                                        <span class="badge bg-primary rounded-pill unread-badge ms-2">{{ $unreadCount }}</span>
+                                    @else
+                                        <span class="badge bg-primary rounded-pill unread-badge ms-2 d-none"></span>
+                                    @endif
                                 </div>
                             </a>
-                        @empty
-                            <div class="p-3 text-muted">You have no conversations yet.</div>
-                        @endforelse
+                        @endforeach
                     </div>
 
                     <div class="col-md-8 d-flex flex-column" style="height: 70vh;">
@@ -229,7 +243,7 @@
                         });
 
                         input.value = '';
-                        setTimeout(scrollToBottom, 50); 
+                        setTimeout(scrollToBottom, 50);
                     } else {
                         alert('Failed to send message');
                     }
@@ -298,8 +312,47 @@
             }
         });
     </script>
+    <script>
+        async function fetchNewMessages() {
+            try {
+                const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
+                const newMessages = await response.json();
 
+                if (Array.isArray(newMessages) && newMessages.length > 0) {
+                    const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
 
+                    newMessages.forEach(message => {
+                        const isMine = message.sender_id === {{ auth()->id() }};
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
+                        messageDiv.dataset.id = message.id;
+
+                        messageDiv.innerHTML = `
+<div class="message-content ${isMine ? 'sent-message' : 'bg-light'}">
+    ${message.content}
+    <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+        ${new Date(message.created_at).toLocaleString('en-GB', {
+                            day: '2-digit', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        })}
+    </div>
+</div>`;
+
+                        messageContainer.appendChild(messageDiv);
+                        lastMessageId = message.id;
+                    });
+
+                    if (nearBottom) {
+                        setTimeout(scrollToBottom, 50);
+                    }
+
+                    updateUnreadCounters(); 
+                }
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }
+        }
+    </script>
 </body>
 
 </html>

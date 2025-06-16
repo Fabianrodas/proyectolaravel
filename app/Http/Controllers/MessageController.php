@@ -26,6 +26,12 @@ class MessageController extends Controller
         $selectedConversation = null;
         if ($request->has('conversation_id')) {
             $selectedConversation = $conversations->where('id', $request->conversation_id)->first();
+            if ($selectedConversation) {
+                $selectedConversation->messages()
+                    ->where('sender_id', '!=', auth()->id())
+                    ->where('read', false)
+                    ->update(['read' => true]);
+            }
         }
 
         return view('projects.messages.index', compact('conversations', 'selectedConversation'));
@@ -159,5 +165,36 @@ class MessageController extends Controller
             ->get();
 
         return response()->json($messages);
+    }
+    public function unreadCounts()
+    {
+        $user = auth()->user();
+        $conversations = Conversation::where(function ($query) use ($user) {
+            $query->where('user1_id', $user->id)
+                ->orWhere('user2_id', $user->id);
+        })
+            ->with([
+                'messages' => function ($q) {
+                    return $q->latest();
+                }
+            ])
+            ->get();
+        $data = [];
+
+        foreach ($conversations as $conversation) {
+            $messages = $conversation->messages;
+            $unread = $messages->where('sender_id', '!=', $user->id)->where('read', false);
+
+            $lastUnread = $unread->last();
+            $lastMessage = $messages->first();
+
+            $data[$conversation->id] = [
+                'count' => $unread->count(),
+                'preview' => $unread->count() > 0
+                    ? ($lastUnread ? $lastUnread->content : null)
+                    : ($lastMessage ? $lastMessage->content : null),
+            ];
+        }
+        return response()->json($data);
     }
 }
