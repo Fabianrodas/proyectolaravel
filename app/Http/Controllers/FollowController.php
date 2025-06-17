@@ -5,27 +5,51 @@ namespace App\Http\Controllers;
 use App\Models\Follow;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Notification;
 
 
 class FollowController extends Controller
 {
 
-    public function toggleFollow($id)
-    {
-        $authUser = auth()->user();
-        $targetUser = User::findOrFail($id);
-    
-        $existing = $authUser->followings()->where('followed_id', $targetUser->id)->first();
-    
-        if ($existing) {
-            $authUser->followings()->detach($targetUser->id);
-            return response()->json(['status' => 'none']);
-        } else {
-            $status = $targetUser->is_private ? 'pending' : 'accepted';
-            $authUser->followings()->attach($targetUser->id, ['status' => $status]);
-            return response()->json(['status' => $status]);
+
+public function toggleFollow($id)
+{
+    $authUser = auth()->user();
+    $targetUser = User::findOrFail($id);
+
+    $existingFollow = $authUser->followings()->where('followed_id', $targetUser->id)->first();
+
+    if ($existingFollow) {
+        // Ya sigue: se hace unfollow
+        $authUser->followings()->detach($targetUser->id);
+        return back();
+    }
+
+    $status = $targetUser->is_private ? 'pending' : 'accepted';
+
+    $authUser->followings()->attach($targetUser->id, ['status' => $status]);
+
+    // Evita notificación duplicada
+    if ($status === 'pending') {
+        $alreadyNotified = \App\Models\Notification::where([
+            ['sender_id', $authUser->id],
+            ['receiver_id', $targetUser->id],
+            ['type', 'follow']
+        ])->first();
+
+        if (!$alreadyNotified) {
+            \App\Models\Notification::create([
+                'sender_id' => $authUser->id,
+                'receiver_id' => $targetUser->id,
+                'type' => 'follow',
+            ]);
         }
     }
+
+    return back();
+}
+
+
     
     /**
      * Display a listing of the resource.

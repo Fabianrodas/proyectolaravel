@@ -12,6 +12,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
 
 Route::redirect('/', '/login');
 
@@ -49,3 +50,8 @@ Route::post('/messages', [MessageController::class, 'store'])->name('messages.st
 Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
 Route::get('/messages/fetch/{conversation}/{last}', [MessageController::class, 'fetchNewMessages']);
 Route::get('/messages/unread-counts', [MessageController::class, 'getUnreadCounts'])->name('messages.unread-counts');
+Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+Route::post('/notifications/accept/{id}', [NotificationController::class, 'accept'])->name('notifications.accept');
+Route::post('/notifications/decline/{id}', [NotificationController::class, 'decline'])->name('notifications.decline');
+Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->name('follow.toggle');
+
