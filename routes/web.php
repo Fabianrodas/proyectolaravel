@@ -43,15 +43,15 @@ Route::get('/settings', [UserController::class, 'edit'])->name('settings');
 Route::post('/settings', [UserController::class, 'update']);
 Route::post('/settings/delete', [UserController::class, 'destroy'])->name('account.delete');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
-
-Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
-Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
-Route::get('/messages/fetch/{conversation}/{last}', [MessageController::class, 'fetchNewMessages']);
 Route::get('/messages/unread-counts', [MessageController::class, 'getUnreadCounts'])->name('messages.unread-counts');
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 Route::post('/notifications/accept/{id}', [NotificationController::class, 'accept'])->name('notifications.accept');
 Route::post('/notifications/decline/{id}', [NotificationController::class, 'decline'])->name('notifications.decline');
 Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->name('follow.toggle');
+Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
+Route::get('/messages/fetch/{conversation}/{last}', [MessageController::class, 'fetchNewMessages']);
+Route::get('/messages/unread-counts', [MessageController::class, 'unreadCounts'])->name('messages.unread-counts');
+Route::post('/messages/mark-read/{conversation}', [MessageController::class, 'markAsRead'])->name('messages.markAsRead');
 

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Messages | Mango</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('mangoico.ico') }}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -67,7 +68,13 @@
         }
     </style>
 </head>
-
+<script>
+    @if(isset($selectedConversation))
+        var conversationId = {{ $selectedConversation->id }};
+    @else
+        var conversationId = null;
+    @endif
+</script>
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -205,154 +212,158 @@
         </div>
     </div>
     <script>
-        function scrollToBottom() {
-            const messageContainer = document.getElementById('messageContainer');
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-    </script>
+    let conversationId = null;
+    @if(isset($selectedConversation))
+        conversationId = {{ $selectedConversation->id }};
+    @endif
+</script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('messageForm');
-            const input = document.getElementById('messageInput');
-            const messageContainer = document.getElementById('messageContainer');
-            const bottom = document.getElementById('bottomOfMessages');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('messageForm');
+    const input = document.getElementById('messageInput');
+    const messageContainer = document.getElementById('messageContainer');
+    const bottom = document.getElementById('bottomOfMessages');
 
-            form.addEventListener('submit', async function (e) {
-                e.preventDefault();
+    let lastMessageId = 0;
+    if (messageContainer) {
+        lastMessageId = Number([...messageContainer.querySelectorAll('.message[data-id]')].pop()?.dataset.id || 0);
+    }
 
-                const content = input.value.trim();
-                if (!content) return;
+    function scrollToBottom() {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
 
-                const formData = new FormData(form);
+    form?.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-                try {
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': form.querySelector('input[name="_token"]').value
-                        },
-                        body: formData
-                    });
+        const content = input.value.trim();
+        if (!content) return;
 
-                    if (response.ok) {
-                        const now = new Date();
-                        const timestamp = now.toLocaleString('en-GB', {
-                            day: '2-digit', month: 'short', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                        });
+        const formData = new FormData(form);
 
-                        input.value = '';
-                        setTimeout(scrollToBottom, 50);
-                    } else {
-                        alert('Failed to send message');
-                    }
-                } catch (error) {
-                    console.error('Message error:', error);
-                    alert('An error occurred');
-                }
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: formData
             });
-            bottom.scrollIntoView({ behavior: 'instant' });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const messageContainer = document.getElementById('messageContainer');
-            const bottom = document.getElementById('bottomOfMessages');
 
-            let lastMessageId = Number(
-                messageContainer.querySelector('.message[data-id]:last-child')?.dataset.id || 0
-            );
-
-            @if(isset($selectedConversation))
-                const conversationId = {{ $selectedConversation->id }};
-            @else
-                const conversationId = null;
-            @endif
-
-            async function fetchNewMessages() {
-                try {
-                    const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
-                    const newMessages = await response.json();
-
-                    if (Array.isArray(newMessages) && newMessages.length > 0) {
-                        const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
-
-                        newMessages.forEach(message => {
-                            const isMine = message.sender_id === {{ auth()->id() }};
-                            const messageDiv = document.createElement('div');
-                            messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
-                            messageDiv.dataset.id = message.id;
-
-                            messageDiv.innerHTML = `
-    <div class="message-content ${isMine ? 'sent-message' : 'bg-light'}">
-        ${message.content}
-        <div class="text-muted small mt-1" style="font-size: 0.75rem;">
-            ${new Date(message.created_at).toLocaleString('en-GB', {
-                                day: '2-digit', month: 'short', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                            })}
-        </div>
-    </div>
-`;
-                            messageContainer.appendChild(messageDiv);
-                            lastMessageId = message.id;
-                        });
-
-                        if (nearBottom) {
-                            setTimeout(scrollToBottom, 50);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error fetching messages:", error);
-                }
+            if (response.ok) {
+                input.value = '';
+                setTimeout(scrollToBottom, 100);
+            } else {
+                alert('Error al enviar el mensaje');
             }
-            if (conversationId) {
-                setInterval(fetchNewMessages, 1500);
-            }
-        });
-    </script>
-    <script>
-        async function fetchNewMessages() {
-            try {
-                const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
-                const newMessages = await response.json();
+        } catch (error) {
+            console.error('Error al enviar:', error);
+        }
+    });
 
-                if (Array.isArray(newMessages) && newMessages.length > 0) {
-                    const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
+    async function fetchNewMessages() {
+        if (!conversationId) return;
 
-                    newMessages.forEach(message => {
-                        const isMine = message.sender_id === {{ auth()->id() }};
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
-                        messageDiv.dataset.id = message.id;
+        try {
+            const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
+            const newMessages = await response.json();
 
-                        messageDiv.innerHTML = `
+            if (Array.isArray(newMessages) && newMessages.length > 0) {
+                const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
+
+                const existingIds = new Set(
+                    [...messageContainer.querySelectorAll('.message[data-id]')].map(el => el.dataset.id)
+                );
+
+                newMessages.forEach(message => {
+                    if (existingIds.has(message.id.toString())) return;
+
+                    const isMine = message.sender_id === {{ auth()->id() }};
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
+                    messageDiv.dataset.id = message.id;
+                    messageDiv.innerHTML = `
 <div class="message-content ${isMine ? 'sent-message' : 'bg-light'}">
     ${message.content}
     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
         ${new Date(message.created_at).toLocaleString('en-GB', {
-                            day: '2-digit', month: 'short', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                        })}
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        })}
     </div>
 </div>`;
+                    messageContainer.appendChild(messageDiv);
+                    lastMessageId = Math.max(lastMessageId, message.id);
+                });
 
-                        messageContainer.appendChild(messageDiv);
-                        lastMessageId = message.id;
-                    });
+                if (nearBottom) scrollToBottom();
 
-                    if (nearBottom) {
-                        setTimeout(scrollToBottom, 50);
-                    }
-
-                    updateUnreadCounters(); 
-                }
-            } catch (error) {
-                console.error("Error fetching messages:", error);
+                setTimeout(markMessagesAsRead, 2000);
             }
+        } catch (err) {
+            console.error('Error fetching messages:', err);
         }
-    </script>
-</body>
+    }
+
+    async function markMessagesAsRead() {
+        if (!conversationId) return;
+        try {
+            await fetch(`/messages/mark-read/${conversationId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+        } catch (err) {
+            console.error("Error al marcar como leído:", err);
+        }
+    }
+
+    async function updateUnreadCounters() {
+        try {
+            const response = await fetch('{{ route('messages.unread-counts') }}');
+            const data = await response.json();
+
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                const convId = item.dataset.id;
+                const badge = item.querySelector('.unread-badge');
+                const preview = item.querySelector('.message-preview');
+
+                const info = data[convId];
+
+                if (info && info.count > 0) {
+                    if (badge) {
+                        badge.textContent = info.count;
+                        badge.classList.remove('d-none');
+                    }
+                    if (preview) {
+                        preview.textContent = info.preview || '';
+                        preview.classList.add('fw-bold');
+                    }
+                } else {
+                    if (badge) badge.classList.add('d-none');
+                    if (preview) {
+                        preview.textContent = info?.preview || '';
+                        preview.classList.remove('fw-bold');
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Error actualizando notificaciones:', err);
+        }
+    }
+
+    if (conversationId) {
+        scrollToBottom();
+        markMessagesAsRead(); 
+        setInterval(fetchNewMessages, 1500);
+    }
+
+    setInterval(updateUnreadCounters, 1500);
+});
+</script>
+
+    </body>
 
 </html>
