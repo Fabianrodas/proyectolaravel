@@ -28,7 +28,7 @@ class MessageController extends Controller
             $selectedConversation = $conversations->where('id', $request->conversation_id)->first();
             if ($selectedConversation) {
                 $selectedConversation->messages()
-                    ->where('sender_id', '!=', auth()->id())
+                    ->where('sender_id', '!=', $user->id)
                     ->where('read', false)
                     ->update(['read' => true]);
             }
@@ -59,15 +59,23 @@ class MessageController extends Controller
             'conversation_id' => 'required|exists:conversations,id',
             'content' => 'required|string|max:1000',
         ]);
-
+    
         $message = Message::create([
             'conversation_id' => $request->conversation_id,
             'sender_id' => Auth::id(),
             'content' => $request->content,
         ]);
-
+    
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'ok',
+                'message' => $message
+            ]);
+        }
+    
         return redirect()->route('messages.index', ['conversation_id' => $request->conversation_id]);
     }
+    
 
     /**
      * Display the specified resource.
@@ -80,7 +88,6 @@ class MessageController extends Controller
         $conversation = Conversation::with(['messages.sender', 'user1', 'user2'])
             ->findOrFail($conversationId);
 
-        // Verifica que el usuario autenticado pertenezca a la conversación
         if (!in_array(Auth::id(), [$conversation->user1_id, $conversation->user2_id])) {
             abort(403);
         }
@@ -169,32 +176,50 @@ class MessageController extends Controller
     public function unreadCounts()
     {
         $user = auth()->user();
+
         $conversations = Conversation::where(function ($query) use ($user) {
             $query->where('user1_id', $user->id)
                 ->orWhere('user2_id', $user->id);
         })
-            ->with([
-                'messages' => function ($q) {
-                    return $q->latest();
-                }
-            ])
-            ->get();
+        ->with(['messages' => function ($query) {
+            $query->latest('created_at');
+        }])
+        ->get();
+
         $data = [];
 
         foreach ($conversations as $conversation) {
             $messages = $conversation->messages;
-            $unread = $messages->where('sender_id', '!=', $user->id)->where('read', false);
 
-            $lastUnread = $unread->last();
-            $lastMessage = $messages->first();
+            $unread = $messages->where('sender_id', '!=', $user->id)
+                            ->where('read', false);
+
+            $lastMessage = $messages->first(); // más reciente
+            $preview = $lastMessage ? $lastMessage->content : null;
 
             $data[$conversation->id] = [
                 'count' => $unread->count(),
-                'preview' => $unread->count() > 0
-                    ? ($lastUnread ? $lastUnread->content : null)
-                    : ($lastMessage ? $lastMessage->content : null),
+                'preview' => $preview,
             ];
         }
+
         return response()->json($data);
     }
+
+    public function markAsRead($conversationId)
+    {
+        $conversation = Conversation::findOrFail($conversationId);
+
+        if (!$conversation->participants()->contains(auth()->id())) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $conversation->messages()
+            ->where('sender_id', '!=', auth()->id())
+            ->where('read', false)
+            ->update(['read' => true]);
+
+        return response()->json(['status' => 'ok']);
+    }
+
 }

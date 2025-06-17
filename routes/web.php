@@ -44,8 +44,8 @@ Route::post('/settings/delete', [UserController::class, 'destroy'])->name('accou
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
 Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
 Route::get('/messages/fetch/{conversation}/{last}', [MessageController::class, 'fetchNewMessages']);
-Route::get('/messages/unread-counts', [MessageController::class, 'getUnreadCounts'])->name('messages.unread-counts');
+Route::get('/messages/unread-counts', [MessageController::class, 'unreadCounts'])->name('messages.unread-counts');
+Route::post('/messages/mark-read/{conversation}', [MessageController::class, 'markAsRead'])->name('messages.markAsRead');
