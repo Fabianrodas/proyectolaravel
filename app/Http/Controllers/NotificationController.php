@@ -45,7 +45,6 @@ public function decline($id)
         abort(403);
     }
 
-    // Elimina relación y la notificación
     auth()->user()->followers()->detach($notification->sender_id);
     $notification->delete();
 

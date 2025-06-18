@@ -113,9 +113,10 @@
             </a>
             <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
             <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
-           <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i> Notifications</a>
-            <a class="nav-link mb-3" href="{{ route('messages.index') }}"><i class="bi bi-chat-left-text me-2"></i>
-              Messages</a>
+            <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i>
+              Notifications</a>
+            <a class="nav-link mb-3" href="{{ route('messages.index') }}">
+              <i class="bi bi-chat-left-text me-2"></i> Messages</a>
             <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           </nav>
           <div class="buttons d-grid gap-3 mt-5">
@@ -125,6 +126,7 @@
               <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
             </form>
           </div>
+          </nav>
         </div>
       </div>
 
@@ -140,21 +142,19 @@
                 @if (auth()->id() === $user->id)
           <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Settings</a>
         @else
-        <button id="followBtn" type="button"
-          data-user-id="{{ $user->id }}"
-          class="btn 
-            {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' : 
-              ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }} me-2">
-          <i class="bi 
-            {{ $status === 'accepted' ? 'bi-check2' : 
-              ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
-          {{ $status === 'accepted' ? 'Following' : 
-            ($status === 'pending' ? 'Requested' : 'Follow') }}
-        </button>
-              <a href="{{ route('messages.start', $user->id) }}"
-                class="btn btn-outline-secondary {{ !$user->canBeViewedBy(auth()->id()) ? 'disabled' : '' }}">
-                <i class="bi bi-chat-left-text me-1"></i> Message
-              </a>
+                <button id="followBtn" type="button" data-user-id="{{ $user->id }}" class="btn 
+              {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' :
+          ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }} me-2">
+                  <i class="bi 
+              {{ $status === 'accepted' ? 'bi-check2' :
+          ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
+                  {{ $status === 'accepted' ? 'Following' :
+          ($status === 'pending' ? 'Requested' : 'Follow') }}
+                </button>
+                <a href="{{ route('messages.start', $user->id) }}"
+                  class="btn btn-outline-secondary {{ !$user->canBeViewedBy(auth()->id()) ? 'disabled' : '' }}">
+                  <i class="bi bi-chat-left-text me-1"></i> Message
+                </a>
         @endif
               </div>
               <p class="mb-0">{{ $user->name }}</p>
@@ -238,39 +238,42 @@
       }
     }
     document.getElementById('followBtn')?.addEventListener('click', function (e) {
-  e.preventDefault();
-  const button = this;
-  const userId = button.dataset.userId;
+      e.preventDefault();
+      const button = this;
+      const userId = button.dataset.userId;
 
-  fetch(`/follow/${userId}`, {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-    let icon = 'bi-plus';
-    let label = 'Follow';
-    let classes = 'btn btn-outline-primary';
+      fetch(`/follow/${userId}`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          let icon = 'bi-plus';
+          let label = 'Follow';
+          let classes = 'btn btn-outline-primary';
 
-    if (data.status === 'accepted') {
-      icon = 'bi-check2';
-      label = 'Following';
-      classes = 'btn btn-outline-primary border-primary text-primary';
-    } else if (data.status === 'pending') {
-      icon = 'bi-clock';
-      label = 'Requested';
-      classes = 'btn btn-outline-secondary';
-    }
+          if (data.status === 'accepted') {
+            icon = 'bi-check2';
+            label = 'Following';
+            classes = 'btn btn-outline-primary border-primary text-primary';
+          } else if (data.status === 'pending') {
+            icon = 'bi-clock';
+            label = 'Requested';
+            classes = 'btn btn-outline-secondary';
+          } else {
+            location.reload();
+            return;
+          }
 
-    button.className = classes + ' me-2';
-    button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
-  })
-  .catch(err => console.error('Follow error:', err));
-});
+          button.className = classes + ' me-2';
+          button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+        })
+        .catch(err => console.error('Follow error:', err));
+    });
 
   </script>
 </body>

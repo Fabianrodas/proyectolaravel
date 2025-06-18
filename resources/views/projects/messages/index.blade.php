@@ -75,6 +75,7 @@
         var conversationId = null;
     @endif
 </script>
+
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -89,9 +90,10 @@
                             Home</a>
                         <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i>
                             Search</a>
-                        <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
-                        <a class="nav-link mb-3" href="{{ route('messages.index') }}"><i
-                                class="bi bi-chat-left-text me-2"></i> Messages</a>
+                        <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i>
+                            Notifications</a>
+                        <a class="nav-link mb-3" href="{{ route('messages.index') }}">
+                            <i class="bi bi-chat-left-text me-2"></i> Messages</a>
                         <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i>
                             About us</a>
                     </nav>
@@ -102,6 +104,7 @@
                             <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
                         </form>
                     </div>
+                    </nav>
                 </div>
             </div>
 
@@ -164,15 +167,6 @@
                                         </a>
                                         <h5 class="mb-0 fw-bold">{{ $otherUser->name }}</h5>
                                     </div>
-                                    @if(Auth::id() !== $otherUser->id)
-                                        <form action="{{ route('follow.toggle', $otherUser->id) }}" method="POST">
-                                            @csrf
-                                            <button
-                                                class="btn {{ auth()->user()->isFollowing($otherUser->id) ? 'btn-primary' : 'btn-outline-primary' }}">
-                                                {{ auth()->user()->isFollowing($otherUser->id) ? 'Following' : 'Follow' }}
-                                            </button>
-                                        </form>
-                                    @endif
                                 </div>
 
                                 <div id="messageContainer" class="flex-grow-1 overflow-auto px-3 mb-3"
@@ -212,158 +206,158 @@
         </div>
     </div>
     <script>
-    let conversationId = null;
-    @if(isset($selectedConversation))
-        conversationId = {{ $selectedConversation->id }};
-    @endif
-</script>
+        let conversationId = null;
+        @if(isset($selectedConversation))
+            conversationId = {{ $selectedConversation->id }};
+        @endif
+    </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('messageForm');
-    const input = document.getElementById('messageInput');
-    const messageContainer = document.getElementById('messageContainer');
-    const bottom = document.getElementById('bottomOfMessages');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('messageForm');
+            const input = document.getElementById('messageInput');
+            const messageContainer = document.getElementById('messageContainer');
+            const bottom = document.getElementById('bottomOfMessages');
 
-    let lastMessageId = 0;
-    if (messageContainer) {
-        lastMessageId = Number([...messageContainer.querySelectorAll('.message[data-id]')].pop()?.dataset.id || 0);
-    }
+            let lastMessageId = 0;
+            if (messageContainer) {
+                lastMessageId = Number([...messageContainer.querySelectorAll('.message[data-id]')].pop()?.dataset.id || 0);
+            }
 
-    function scrollToBottom() {
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-    }
+            function scrollToBottom() {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
 
-    form?.addEventListener('submit', async function (e) {
-        e.preventDefault();
+            form?.addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-        const content = input.value.trim();
-        if (!content) return;
+                const content = input.value.trim();
+                if (!content) return;
 
-        const formData = new FormData(form);
+                const formData = new FormData(form);
 
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: formData
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        input.value = '';
+                        setTimeout(scrollToBottom, 100);
+                    } else {
+                        alert('Error al enviar el mensaje');
+                    }
+                } catch (error) {
+                    console.error('Error al enviar:', error);
+                }
             });
 
-            if (response.ok) {
-                input.value = '';
-                setTimeout(scrollToBottom, 100);
-            } else {
-                alert('Error al enviar el mensaje');
-            }
-        } catch (error) {
-            console.error('Error al enviar:', error);
-        }
-    });
+            async function fetchNewMessages() {
+                if (!conversationId) return;
 
-    async function fetchNewMessages() {
-        if (!conversationId) return;
+                try {
+                    const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
+                    const newMessages = await response.json();
 
-        try {
-            const response = await fetch(`/messages/fetch/${conversationId}/${lastMessageId}`);
-            const newMessages = await response.json();
+                    if (Array.isArray(newMessages) && newMessages.length > 0) {
+                        const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
 
-            if (Array.isArray(newMessages) && newMessages.length > 0) {
-                const nearBottom = messageContainer.scrollTop + messageContainer.clientHeight >= messageContainer.scrollHeight - 100;
+                        const existingIds = new Set(
+                            [...messageContainer.querySelectorAll('.message[data-id]')].map(el => el.dataset.id)
+                        );
 
-                const existingIds = new Set(
-                    [...messageContainer.querySelectorAll('.message[data-id]')].map(el => el.dataset.id)
-                );
+                        newMessages.forEach(message => {
+                            if (existingIds.has(message.id.toString())) return;
 
-                newMessages.forEach(message => {
-                    if (existingIds.has(message.id.toString())) return;
-
-                    const isMine = message.sender_id === {{ auth()->id() }};
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
-                    messageDiv.dataset.id = message.id;
-                    messageDiv.innerHTML = `
+                            const isMine = message.sender_id === {{ auth()->id() }};
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = `d-flex mb-2 message ${isMine ? 'sent' : 'received'}`;
+                            messageDiv.dataset.id = message.id;
+                            messageDiv.innerHTML = `
 <div class="message-content ${isMine ? 'sent-message' : 'bg-light'}">
     ${message.content}
     <div class="text-muted small mt-1" style="font-size: 0.75rem;">
         ${new Date(message.created_at).toLocaleString('en-GB', {
-            day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        })}
+                                day: '2-digit', month: 'short', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            })}
     </div>
 </div>`;
-                    messageContainer.appendChild(messageDiv);
-                    lastMessageId = Math.max(lastMessageId, message.id);
-                });
+                            messageContainer.appendChild(messageDiv);
+                            lastMessageId = Math.max(lastMessageId, message.id);
+                        });
 
-                if (nearBottom) scrollToBottom();
+                        if (nearBottom) scrollToBottom();
 
-                setTimeout(markMessagesAsRead, 2000);
+                        setTimeout(markMessagesAsRead, 2000);
+                    }
+                } catch (err) {
+                    console.error('Error fetching messages:', err);
+                }
             }
-        } catch (err) {
-            console.error('Error fetching messages:', err);
-        }
-    }
 
-    async function markMessagesAsRead() {
-        if (!conversationId) return;
-        try {
-            await fetch(`/messages/mark-read/${conversationId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
+            async function markMessagesAsRead() {
+                if (!conversationId) return;
+                try {
+                    await fetch(`/messages/mark-read/${conversationId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                } catch (err) {
+                    console.error("Error al marcar como leído:", err);
                 }
-            });
-        } catch (err) {
-            console.error("Error al marcar como leído:", err);
-        }
-    }
+            }
 
-    async function updateUnreadCounters() {
-        try {
-            const response = await fetch('{{ route('messages.unread-counts') }}');
-            const data = await response.json();
+            async function updateUnreadCounters() {
+                try {
+                    const response = await fetch('{{ route('messages.unread-counts') }}');
+                    const data = await response.json();
 
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                const convId = item.dataset.id;
-                const badge = item.querySelector('.unread-badge');
-                const preview = item.querySelector('.message-preview');
+                    document.querySelectorAll('.conversation-item').forEach(item => {
+                        const convId = item.dataset.id;
+                        const badge = item.querySelector('.unread-badge');
+                        const preview = item.querySelector('.message-preview');
 
-                const info = data[convId];
+                        const info = data[convId];
 
-                if (info && info.count > 0) {
-                    if (badge) {
-                        badge.textContent = info.count;
-                        badge.classList.remove('d-none');
-                    }
-                    if (preview) {
-                        preview.textContent = info.preview || '';
-                        preview.classList.add('fw-bold');
-                    }
-                } else {
-                    if (badge) badge.classList.add('d-none');
-                    if (preview) {
-                        preview.textContent = info?.preview || '';
-                        preview.classList.remove('fw-bold');
-                    }
+                        if (info && info.count > 0) {
+                            if (badge) {
+                                badge.textContent = info.count;
+                                badge.classList.remove('d-none');
+                            }
+                            if (preview) {
+                                preview.textContent = info.preview || '';
+                                preview.classList.add('fw-bold');
+                            }
+                        } else {
+                            if (badge) badge.classList.add('d-none');
+                            if (preview) {
+                                preview.textContent = info?.preview || '';
+                                preview.classList.remove('fw-bold');
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('Error actualizando notificaciones:', err);
                 }
-            });
-        } catch (err) {
-            console.error('Error actualizando notificaciones:', err);
-        }
-    }
+            }
 
-    if (conversationId) {
-        scrollToBottom();
-        markMessagesAsRead(); 
-        setInterval(fetchNewMessages, 1500);
-    }
+            if (conversationId) {
+                scrollToBottom();
+                markMessagesAsRead();
+                setInterval(fetchNewMessages, 1500);
+            }
 
-    setInterval(updateUnreadCounters, 1500);
-});
-</script>
+            setInterval(updateUnreadCounters, 1500);
+        });
+    </script>
 
-    </body>
+</body>
 
 </html>

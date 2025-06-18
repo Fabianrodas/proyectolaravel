@@ -6,6 +6,7 @@
     <title>Conversation | Mango</title>
     <link rel="icon" href="{{ asset('mangoico.ico') }}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -84,12 +85,13 @@
                             Home</a>
                         <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i>
                             Search</a>
-                        <a class="nav-link mb-3" href="#"><i class="bi bi-bell me-2"></i> Notifications</a>
-                        <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
+                        <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i>
+                            Notifications</a>
+                        <a class="nav-link mb-3" href="{{ route('messages.index') }}">
+                            <i class="bi bi-chat-left-text me-2"></i> Messages</a>
                         <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i>
                             About us</a>
                     </nav>
-
                     <div class="buttons d-grid gap-3 mt-5">
                         <a href="{{ route('posts.create') }}" class="btn btn-outline-dark btn-wide">Post</a>
                         <form action="{{ route('logout') }}" method="POST">
@@ -97,45 +99,55 @@
                             <button type="submit" class="btn btn-outline-dark btn-wide">Log Out</button>
                         </form>
                     </div>
+                    </nav>
                 </div>
             </div>
 
             <div class="col-10 p-4">
-                <h3 class="fw-bold mb-4">Conversation with {{ $conversation->otherUser(auth()->id())->name }}</h3>
+                @php
+                    $targetUser = $conversation->otherUser(auth()->id());
+                    $status = $follow ? $follow->pivot->status : null;
+                    $canMessage = !$targetUser->is_private || ($status === 'accepted');
+                @endphp
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="fw-bold mb-0">{{ $targetUser->username }}</h3>
+                </div>
 
                 <div class="message-box border rounded shadow-sm mb-3 bg-white">
                     @foreach ($conversation->messages as $message)
                         <div class="message {{ $message->sender_id === auth()->id() ? 'sent' : 'received' }}">
-                            <div class="message-content">
-                                {{ $message->content }}
-                            </div>
-                            <div class="text-muted small mt-1">
-                                {{ $message->created_at->format('d M Y, H:i') }}
-                            </div>
+                            <div class="message-content">{{ $message->content }}</div>
+                            <div class="text-muted small mt-1">{{ $message->created_at->format('d M Y, H:i') }}</div>
                         </div>
                     @endforeach
                 </div>
 
-                <form action="{{ route('messages.store') }}" method="POST" class="d-flex align-items-center gap-2">
-                    @csrf
-                    <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
-                    <input type="text" name="content" class="form-control" placeholder="Type your message..." required>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send"></i> Send
-                    </button>
-                </form>
+                @if(session('error'))
+                    <div class="alert alert-danger mt-2">{{ session('error') }}</div>
+                    <div class="alert alert-warning">
+                        This account is private. You must be an approved follower to send messages.
+                    </div>
+                @endif
+
+                @if($canMessage)
+                    <form action="{{ route('messages.store') }}" method="POST" class="d-flex align-items-center gap-2 mt-2">
+                        @csrf
+                        <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
+                        <input type="text" name="content" class="form-control" placeholder="Type your message..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </form>
+                @else
+                    <div class="alert alert-warning">
+                        This account is private. You must be an approved follower to send messages.
+                    </div>
+                @endif
             </div>
 
         </div>
     </div>
-    <script>
-        window.onload = function () {
-            var messageBox = document.querySelector('.message-box');
-            if (messageBox) {
-                messageBox.scrollTop = messageBox.scrollHeight;
-            }
-        };
-    </script>
-
 </body>
+
 </html>

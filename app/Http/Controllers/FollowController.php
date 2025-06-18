@@ -10,35 +10,35 @@ use App\Models\Notification;
 
 class FollowController extends Controller
 {
-
-
-public function toggleFollow($id)
+    public function toggleFollow($id)
 {
     $authUser = auth()->user();
     $targetUser = User::findOrFail($id);
 
+    if ($authUser->id === $targetUser->id) {
+        return response()->json(['error' => 'Cannot follow yourself'], 400);
+    }
+
     $existingFollow = $authUser->followings()->where('followed_id', $targetUser->id)->first();
 
     if ($existingFollow) {
-        // Ya sigue: se hace unfollow
         $authUser->followings()->detach($targetUser->id);
-        return back();
+        return response()->json(['status' => 'unfollowed']);
     }
 
     $status = $targetUser->is_private ? 'pending' : 'accepted';
 
     $authUser->followings()->attach($targetUser->id, ['status' => $status]);
 
-    // Evita notificación duplicada
     if ($status === 'pending') {
-        $alreadyNotified = \App\Models\Notification::where([
+        $alreadyNotified = Notification::where([
             ['sender_id', $authUser->id],
             ['receiver_id', $targetUser->id],
             ['type', 'follow']
         ])->first();
 
         if (!$alreadyNotified) {
-            \App\Models\Notification::create([
+            Notification::create([
                 'sender_id' => $authUser->id,
                 'receiver_id' => $targetUser->id,
                 'type' => 'follow',
@@ -46,9 +46,8 @@ public function toggleFollow($id)
         }
     }
 
-    return back();
+    return response()->json(['status' => $status]);
 }
-
 
     
     /**

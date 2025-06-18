@@ -54,28 +54,34 @@ class MessageController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'conversation_id' => 'required|exists:conversations,id',
-            'content' => 'required|string|max:1000',
-        ]);
-    
-        $message = Message::create([
-            'conversation_id' => $request->conversation_id,
-            'sender_id' => Auth::id(),
-            'content' => $request->content,
-        ]);
-    
-        if ($request->ajax()) {
-            return response()->json([
-                'status' => 'ok',
-                'message' => $message
-            ]);
-        }
-    
-        return redirect()->route('messages.index', ['conversation_id' => $request->conversation_id]);
+{
+    $request->validate([
+        'conversation_id' => 'required|exists:conversations,id',
+        'content' => 'required|string|max:1000',
+    ]);
+
+    $conversation = Conversation::findOrFail($request->conversation_id);
+    $authUser = auth()->user();
+    $targetUser = $conversation->otherUser($authUser->id);
+
+    $isFollowingAccepted = $authUser->followings()
+        ->where('followed_id', $targetUser->id)
+        ->get()
+        ->pluck('pivot.status')
+        ->contains('accepted');
+
+    if ($targetUser->is_private && !$isFollowingAccepted) {
+        return redirect()->back()->with('error', 'You cannot message this user unless they approve your follow request.');
     }
-    
+
+    $message = Message::create([
+        'conversation_id' => $request->conversation_id,
+        'sender_id' => $authUser->id,
+        'content' => $request->content,
+    ]);
+
+    return redirect()->route('messages.index', ['conversation_id' => $conversation->id]);
+}
 
     /**
      * Display the specified resource.
@@ -83,17 +89,6 @@ class MessageController extends Controller
      * @param  \App\Models\Message  $message
      * @return \Illuminate\Http\Response
      */
-    public function show($conversationId)
-    {
-        $conversation = Conversation::with(['messages.sender', 'user1', 'user2'])
-            ->findOrFail($conversationId);
-
-        if (!in_array(Auth::id(), [$conversation->user1_id, $conversation->user2_id])) {
-            abort(403);
-        }
-
-        return view('projects.messages.show', compact('conversation'));
-    }
 
     /**
      * Show the form for editing the specified resource.

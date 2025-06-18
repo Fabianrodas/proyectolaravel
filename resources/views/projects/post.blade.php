@@ -129,8 +129,10 @@
             </a>
             <a class="nav-link mb-3" href="{{ route('home') }}"><i class="bi bi-house-door me-2"></i> Home</a>
             <a class="nav-link mb-3" href="{{ route('search') }}"><i class="bi bi-search me-2"></i> Search</a>
-            <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i> Notifications</a>
-            <a class="nav-link mb-3" href="#"><i class="bi bi-chat-left-text me-2"></i> Messages</a>
+            <a class="nav-link mb-3" href="{{ route('notifications') }}"><i class="bi bi-bell me-2"></i>
+              Notifications</a>
+            <a class="nav-link mb-3" href="{{ route('messages.index') }}">
+              <i class="bi bi-chat-left-text me-2"></i> Messages</a>
             <a class="nav-link mb-5" href="{{ route('about') }}"><i class="bi bi-info-circle me-2"></i> About us</a>
           </nav>
           <div class="buttons d-grid gap-3 mt-5">
@@ -156,24 +158,21 @@
                 <strong class="fs-4">{{ $post->user->username }}</strong>
               </div>
               @if(auth()->id() !== $post->user->id)
-                  @php
-                      $relationship = auth()->user()->followings()->where('followed_id', $post->user->id)->first();
-                      $status = $relationship ? $relationship->pivot->status : null;
-                  @endphp
+              @php
+            $relationship = auth()->user()->followings()->where('followed_id', $post->user->id)->first();
+            $status = $relationship ? $relationship->pivot->status : null;
+          @endphp
 
-                  <button id="followBtn"
-                      type="button"
-                      data-user-id="{{ $post->user->id }}"
-                      class="btn 
-                          {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' : 
-                            ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }}">
-                      <i class="bi 
-                          {{ $status === 'accepted' ? 'bi-check2' : 
-                            ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
-                      {{ $status === 'accepted' ? 'Following' : 
-                        ($status === 'pending' ? 'Requested' : 'Follow') }}
-                  </button>
-              @endif
+              <button id="followBtn" type="button" data-user-id="{{ $post->user->id }}" class="btn 
+                    {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' :
+        ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }}">
+              <i class="bi 
+                    {{ $status === 'accepted' ? 'bi-check2' :
+        ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
+              {{ $status === 'accepted' ? 'Following' :
+        ($status === 'pending' ? 'Requested' : 'Follow') }}
+              </button>
+        @endif
             </div>
 
             <div class="img-container mb-3">
@@ -189,7 +188,7 @@
               </div>
               @php
         $liked = $post->likes->contains(auth()->id());
-      @endphp
+        @endphp
 
               <form action="{{ route('posts.like', $post->id) }}" method="POST" class="mb-0">
                 @csrf
@@ -241,42 +240,42 @@
     </div>
   </div>
   <script>
-document.getElementById('followBtn')?.addEventListener('click', function (e) {
-    e.preventDefault();
+    document.getElementById('followBtn')?.addEventListener('click', function (e) {
+      e.preventDefault();
 
-    const button = this;
-    const userId = button.dataset.userId;
+      const button = this;
+      const userId = button.dataset.userId;
 
-    fetch(`/follow/${userId}`, {
+      fetch(`/follow/${userId}`, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
         }
-    })
-    .then(res => res.json())
-    .then(data => {
-        let icon = 'bi-plus';
-        let label = 'Follow';
-        let classes = 'btn btn-outline-primary';
+      })
+        .then(res => res.json())
+        .then(data => {
+          let icon = 'bi-plus';
+          let label = 'Follow';
+          let classes = 'btn btn-outline-primary';
 
-        if (data.status === 'accepted') {
+          if (data.status === 'accepted') {
             icon = 'bi-check2';
             label = 'Following';
             classes = 'btn btn-outline-primary border-primary text-primary';
-        } else if (data.status === 'pending') {
+          } else if (data.status === 'pending') {
             icon = 'bi-clock';
             label = 'Requested';
             classes = 'btn btn-outline-secondary';
-        }
+          }
 
-        button.className = classes;
-        button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
-    })
-    .catch(err => console.error('Follow error:', err));
-});
-</script>
+          button.className = classes;
+          button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+        })
+        .catch(err => console.error('Follow error:', err));
+    });
+  </script>
 
 </body>
 
