@@ -42,7 +42,10 @@ Route::post('/follow/{id}', [FollowController::class, 'toggleFollow'])->middlewa
 Route::get('/settings', [UserController::class, 'edit'])->name('settings');
 Route::post('/settings', [UserController::class, 'update']);
 Route::post('/settings/delete', [UserController::class, 'destroy'])->name('account.delete');
-Route::get('/search', [SearchController::class, 'index'])->name('search');
+Route::prefix('search')->middleware('auth')->group(function () {
+    Route::get('/', [SearchController::class, 'index'])->name('search');
+    Route::get('/users', [SearchController::class, 'ajaxSearch'])->name('search.ajax');
+});
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 Route::post('/notifications/accept/{id}', [NotificationController::class, 'accept'])->name('notifications.accept');
 Route::post('/notifications/decline/{id}', [NotificationController::class, 'decline'])->name('notifications.decline');

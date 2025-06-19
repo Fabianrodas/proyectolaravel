@@ -82,6 +82,25 @@
       font-size: 1rem;
       padding: 0.5rem 1.2rem;
     }
+
+    #suggestions {
+      max-height: 300px;
+      overflow-y: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #suggestions li {
+      transition: background 0.2s;
+    }
+
+    #suggestions li:hover {
+      background-color: #f1f1f1;
+    }
+
+    img.rounded-circle {
+      object-fit: cover;
+    }
   </style>
 </head>
 
@@ -120,9 +139,13 @@
         </div>
 
         <div class="search-box mb-4">
-          <form method="GET" action="{{ route('search') }}" class="d-flex justify-content-center">
-            <input type="text" name="search" class="form-control w-50 me-2 search-input" placeholder="Search users..."
-              value="{{ old('search', $query ?? '') }}">
+          <form method="GET" action="{{ route('search') }}"
+            class="d-flex justify-content-center align-items-start position-relative gap-2 search-box">
+            <div class="position-relative w-100">
+              <input type="text" id="searchInput" name="search" value="{{ old('search', $query ?? '') }}"
+                class="form-control search-input" placeholder="Search users..." autocomplete="off">
+              <ul id="suggestions" class="list-group position-absolute w-100 mt-1" style="z-index: 1000;"></ul>
+            </div>
             <button type="submit" class="btn btn-primary search-btn">Search</button>
           </form>
         </div>
@@ -222,8 +245,49 @@
       });
     });
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const input = document.getElementById('searchInput');
+      const suggestions = document.getElementById('suggestions');
 
+      input.addEventListener('input', function () {
+        const query = this.value;
 
+        if (query.length < 2) {
+          suggestions.innerHTML = '';
+          return;
+        }
+
+        fetch(`/search/users?query=${query}`)
+          .then(response => response.json())
+          .then(users => {
+            suggestions.innerHTML = '';
+
+            users.forEach(user => {
+              const li = document.createElement('li');
+              li.classList.add('list-group-item');
+
+              li.innerHTML = `
+                <a href="/user/${user.id}" class="d-flex align-items-center text-decoration-none text-dark">
+                  <img src="${user.image}" class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                  <div>
+                    <div><strong>@${user.username}</strong></div>
+                    <div class="text-muted small">${user.name}</div>
+                  </div>
+                </a>
+              `;
+              suggestions.appendChild(li);
+            });
+          });
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+          suggestions.innerHTML = '';
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
