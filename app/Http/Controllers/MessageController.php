@@ -7,6 +7,7 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Notification;
 
 class MessageController extends Controller
 {
@@ -79,6 +80,13 @@ class MessageController extends Controller
         'sender_id' => $authUser->id,
         'content' => $request->content,
     ]);
+
+    Notification::create([
+        'sender_id' => $authUser->id,
+        'receiver_id' => $targetUser->id,
+        'type' => 'message',
+    ]);
+    
 
     return redirect()->route('messages.index', ['conversation_id' => $conversation->id]);
 }

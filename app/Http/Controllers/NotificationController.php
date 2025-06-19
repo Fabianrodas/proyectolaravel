@@ -21,33 +21,40 @@ class NotificationController extends Controller
     }
 
     public function accept($id)
-{
-    $notification = Notification::findOrFail($id);
+    {
+        $notification = Notification::findOrFail($id);
+    
+        if ($notification->receiver_id !== auth()->id()) {
+            return back()->with('error', 'Unauthorized');
+        }
+    
+        $follower = $notification->sender;
+        $authUser = auth()->user();
+    
+        $authUser->followers()->updateExistingPivot($follower->id, ['status' => 'accepted']);
+    
+        $notification->delete();
+    
+        Notification::create([
+            'sender_id' => $follower->id,
+            'receiver_id' => $authUser->id,
+            'type' => 'new_follower',
+        ]);
+    
+        return redirect()->back()->with('success', 'Follow request accepted.');
+    }    
 
-    if ($notification->receiver_id !== auth()->id()) {
-        abort(403);
+    public function decline($id)
+    {
+        $notification = Notification::findOrFail($id);
+    
+        if ($notification->receiver_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    
+        $notification->delete();
+    
+        return response()->json(['status' => 'deleted']);
     }
-
-    auth()->user()
-        ->followers()
-        ->updateExistingPivot($notification->sender_id, ['status' => 'accepted']);
-
-    $notification->delete();
-
-    return back();
-}
-
-public function decline($id)
-{
-    $notification = Notification::findOrFail($id);
-
-    if ($notification->receiver_id !== auth()->id()) {
-        abort(403);
-    }
-
-    auth()->user()->followers()->detach($notification->sender_id);
-    $notification->delete();
-
-    return back();
-}
+    
 }

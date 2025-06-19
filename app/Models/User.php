@@ -97,4 +97,12 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Post::class, 'likes')->withTimestamps();
     }
+    public function getConversationWith($otherUserId)
+    {
+        return \App\Models\Conversation::where(function ($q) use ($otherUserId) {
+            $q->where('user1_id', $this->id)->where('user2_id', $otherUserId);
+        })->orWhere(function ($q) use ($otherUserId) {
+            $q->where('user1_id', $otherUserId)->where('user2_id', $this->id);
+        })->first();
+    }
 }

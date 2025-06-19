@@ -250,31 +250,36 @@
           'Content-Type': 'application/json'
         }
       })
-        .then(res => res.json())
-        .then(data => {
-          let icon = 'bi-plus';
-          let label = 'Follow';
-          let classes = 'btn btn-outline-primary';
+      .then(res => res.json())
+      .then(data => {
+        let icon = 'bi-plus';
+        let label = 'Follow';
+        let classes = 'btn btn-outline-primary';
 
-          if (data.status === 'accepted') {
-            icon = 'bi-check2';
-            label = 'Following';
-            classes = 'btn btn-outline-primary border-primary text-primary';
-          } else if (data.status === 'pending') {
-            icon = 'bi-clock';
-            label = 'Requested';
-            classes = 'btn btn-outline-secondary';
-          } else {
-            location.reload();
-            return;
-          }
+        if (data.status === 'accepted') {
+          icon = 'bi-check2';
+          label = 'Following';
+          classes = 'btn btn-outline-primary border-primary text-primary';
+        } else if (data.status === 'pending') {
+          icon = 'bi-clock';
+          label = 'Requested';
+          classes = 'btn btn-outline-secondary';
+        } else if (data.status === 'unfollowed') {
+          icon = 'bi-plus';
+          label = 'Follow';
+          classes = 'btn btn-outline-primary';
+        }
 
-          button.className = classes + ' me-2';
-          button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
-        })
-        .catch(err => console.error('Follow error:', err));
+        button.className = classes + ' me-2';
+        button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+
+        location.reload();
+      })
+      .catch(err => {
+        console.error('Follow error:', err);
+        location.reload(); 
+      });
     });
-
   </script>
 </body>
 
