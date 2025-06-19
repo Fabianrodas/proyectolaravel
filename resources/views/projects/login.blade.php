@@ -20,14 +20,6 @@
       height: 100vh;
     }
 
-    .left-image {
-      background: #f8f9fa url('/storage/images/mango.png') no-repeat;
-      background-size: 80%;
-      background-position: 100% 20%;
-      height: 100%;
-      min-height: 700px;
-    }
-
     .login-section {
       display: flex;
       align-items: center;
@@ -136,16 +128,49 @@
         font-size: 0.9rem;
       }
     }
+    
+    .carousel-img {
+      width: 400px;
+      height: 600px;
+      object-fit: contain;
+    }
+
+    #myCarousel {
+      margin-left: 70px;
+    }
   </style>
 </head>
 
 <body>
-
+    
   <div class="container-fluid">
     <div class="row h-100">
-
-      <div class="col-md-6 left-image"></div>
-
+      <div class="col-6 d-flex align-items-center justify-content-center">
+        <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="/storage/images/mango.png" class="d-block w-100 carousel-img" alt="Slide 1">
+            </div>
+            <div class="carousel-item">
+              <img src="/storage/images/mango2.png" class="d-block w-100 carousel-img" alt="Slide 2">
+            </div>
+            <div class="carousel-item">
+              <img src="/storage/images/mango3.png" class="d-block w-100 carousel-img" alt="Slide 3">
+            </div>
+            <div class="carousel-item">
+              <img src="/storage/images/mango4.png" class="d-block w-100 carousel-img" alt="Slide 4">
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
       <div class="col-md-6 login-section">
         <div class="login-card d-flex flex-column">
           <div class="text-center mb-4">
