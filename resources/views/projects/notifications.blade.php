@@ -132,9 +132,11 @@
       <div class="card mb-3">
         <div class="card-body d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center">
-            <img src="{{ asset($notification->sender->image ?? 'storage/images/default.jpg') }}"
-              class="rounded-circle me-3" width="50" height="50">
-            <div>
+            <a href="{{ route('users.profile', $notification->sender->id) }}">
+            <img src="{{ asset($notification->sender->image ?? 'storage/images/default.jpg') }}" class="rounded-circle me-3"
+            width="50" height="50">
+            </a>
+          <div>
               <strong>{{ $notification->sender->username }}</strong><br>
               <span class="text-muted">started following you</span><br>
               <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>

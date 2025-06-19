@@ -143,10 +143,10 @@
           <a href="{{ route('settings') }}" class="btn btn-outline-secondary">Settings</a>
         @else
                 <button id="followBtn" type="button" data-user-id="{{ $user->id }}" class="btn 
-              {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' :
+                {{ $status === 'accepted' ? 'btn-outline-primary border-primary text-primary' :
           ($status === 'pending' ? 'btn-outline-secondary' : 'btn-outline-primary') }} me-2">
                   <i class="bi 
-              {{ $status === 'accepted' ? 'bi-check2' :
+                {{ $status === 'accepted' ? 'bi-check2' :
           ($status === 'pending' ? 'bi-clock' : 'bi-plus') }} me-1"></i>
                   {{ $status === 'accepted' ? 'Following' :
           ($status === 'pending' ? 'Requested' : 'Follow') }}
@@ -160,9 +160,13 @@
               <p class="mb-0">{{ $user->name }}</p>
               <small>{{ $user->bio ?? 'No bio yet' }}</small>
               <div class="mt-2">
-                <span><strong>{{ $postCount }}</strong> posts</span> ·
-                <span><strong>{{ $followerCount }}</strong> followers</span> ·
-                <span><strong>{{ $followingCount }}</strong> following</span>
+              <span class="text-dark fw-semibold"><strong>{{ $postCount }}</strong> posts</span> ·
+                <a href="#" data-bs-toggle="modal" data-bs-target="#followersModal" class="text-dark fw-semibold text-decoration-none">
+                  <strong>{{ $followerCount }}</strong> followers
+                </a> ·
+                <a href="#" data-bs-toggle="modal" data-bs-target="#followingModal" class="text-dark fw-semibold text-decoration-none">
+                  <strong>{{ $followingCount }}</strong> following
+                </a>
               </div>
             </div>
           </div>
@@ -222,7 +226,57 @@
       </div>
     </div>
   </div>
-
+  <div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          @forelse($followers as $follower)
+        <div class="d-flex align-items-center mb-3">
+        <a href="{{ route('users.profile', $follower->id) }}">
+          <img src="{{ asset($follower->image ?? 'storage/images/default.jpg') }}" class="rounded-circle me-2"
+          width="40" height="40">
+        </a>
+        <a href="{{ route('users.profile', $follower->id) }}"  class="text-dark fw-semibold text-decoration-none">
+          {{ $follower->username }}
+        </a>
+        </div>
+      @empty
+        <p>No followers yet.</p>
+      @endforelse
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="followingModalLabel">Following</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          @forelse($following as $followed)
+        <div class="d-flex align-items-center mb-3">
+        <a href="{{ route('users.profile', $followed->id) }}">
+          <img src="{{ asset($followed->image ?? 'storage/images/default.jpg') }}" class="rounded-circle me-2"
+          width="40" height="40">
+        </a>
+        <a href="{{ route('users.profile', $followed->id) }}"  class="text-dark fw-semibold text-decoration-none">
+          {{ $followed->username }}
+        </a>
+        </div>
+      @empty
+        <p>Not following anyone yet.</p>
+      @endforelse
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     function selectTab(button) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -250,35 +304,35 @@
           'Content-Type': 'application/json'
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        let icon = 'bi-plus';
-        let label = 'Follow';
-        let classes = 'btn btn-outline-primary';
+        .then(res => res.json())
+        .then(data => {
+          let icon = 'bi-plus';
+          let label = 'Follow';
+          let classes = 'btn btn-outline-primary';
 
-        if (data.status === 'accepted') {
-          icon = 'bi-check2';
-          label = 'Following';
-          classes = 'btn btn-outline-primary border-primary text-primary';
-        } else if (data.status === 'pending') {
-          icon = 'bi-clock';
-          label = 'Requested';
-          classes = 'btn btn-outline-secondary';
-        } else if (data.status === 'unfollowed') {
-          icon = 'bi-plus';
-          label = 'Follow';
-          classes = 'btn btn-outline-primary';
-        }
+          if (data.status === 'accepted') {
+            icon = 'bi-check2';
+            label = 'Following';
+            classes = 'btn btn-outline-primary border-primary text-primary';
+          } else if (data.status === 'pending') {
+            icon = 'bi-clock';
+            label = 'Requested';
+            classes = 'btn btn-outline-secondary';
+          } else if (data.status === 'unfollowed') {
+            icon = 'bi-plus';
+            label = 'Follow';
+            classes = 'btn btn-outline-primary';
+          }
 
-        button.className = classes + ' me-2';
-        button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
+          button.className = classes + ' me-2';
+          button.innerHTML = `<i class='bi ${icon} me-1'></i> ${label}`;
 
-        location.reload();
-      })
-      .catch(err => {
-        console.error('Follow error:', err);
-        location.reload(); 
-      });
+          location.reload();
+        })
+        .catch(err => {
+          console.error('Follow error:', err);
+          location.reload();
+        });
     });
   </script>
 </body>

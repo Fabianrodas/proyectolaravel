@@ -56,6 +56,8 @@ class UserController extends Controller
         $relationship = auth()->user()->followings()->where('followed_id', $user->id)->first();
     
         $status = $relationship ? $relationship->pivot->status : null;
+        $followers = $user->acceptedFollowers()->get();
+        $following = $user->acceptedFollowings()->get();
     
         return view('projects.profile', [
             'user' => $user,
@@ -64,8 +66,10 @@ class UserController extends Controller
             'postCount' => $user->posts_count,
             'followerCount' => $user->acceptedFollowers()->count(),
             'followingCount' => $user->acceptedFollowings()->count(),
-            'status' => $status
-        ]);
+            'status' => $status,
+            'followers' => $followers,
+            'following' => $following,
+        ]);        
     }
 
     /**
@@ -149,7 +153,6 @@ class UserController extends Controller
         return redirect('/login')->with('message', 'Your account has been deleted.');
     }
 
-
     public function showProfile()
     {
         $user = Auth::user();
@@ -165,13 +168,18 @@ class UserController extends Controller
         $followerCount = $user->acceptedFollowers()->count(); 
         $followingCount = $user->acceptedFollowings()->count();
 
+        $followers = $user->acceptedFollowers()->get();
+        $following = $user->acceptedFollowings()->get();
+
         return view('projects.profile', compact(
             'user',
             'posts',
             'likedPosts',
             'postCount',
             'followerCount',
-            'followingCount'
+            'followingCount',
+            'followers',
+            'following'
         ));
     }
 
