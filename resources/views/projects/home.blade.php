@@ -156,7 +156,10 @@
                   <div><i class="bi bi-chat-left-text-fill text-primary me-1"></i> {{ $post->comments_count }} comments</div>
                 </div>
                 <div class="d-flex gap-2">
-                  <input type="text" class="form-control" placeholder="Add a comment">
+                  <form action="{{ route('comments.store', $post->id) }}" method="POST" class="comment-form w-100">
+                    @csrf
+                    <input type="text" name="content" class="form-control" placeholder="Add a comment" required>
+                  </form>
                   @php $liked = $post->likes->contains(auth()->id()); @endphp
                   <form action="{{ route('posts.like', $post->id) }}" method="POST" class="mb-0">
                     @csrf
@@ -354,6 +357,19 @@
       }, 150);
     }
   </script>
+  <script>
+  document.querySelectorAll('.comment-form').forEach(form => {
+    const input = form.querySelector('input[name="content"]');
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (this.value.trim() !== '') {
+          form.submit();
+        }
+      }
+    });
+  });
+</script>
 </body>
 
 </html>
