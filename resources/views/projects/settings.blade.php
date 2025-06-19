@@ -152,17 +152,15 @@
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-12 mb-3">
             <button type="submit" class="btn btn-primary w-100">Confirm</button>
           </div>
-          <div class="col-md-6 mt-3">
+          
+        </form>
           <form action="{{ route('account.delete') }}" method="POST" id="deleteAccountForm">
             @csrf
             <button type="button" class="btn btn-danger w-100" onclick="confirmDelete()">Delete my account</button>
           </form>
-        </div>
-        </form>
-
       </div>
     </div>
   </div>
